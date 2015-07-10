@@ -2,7 +2,7 @@
 
 Bluetooth HCI socket binding for Node.js
 
-Currently only supports Linux.
+__NOTE:__ Currently only supports __Linux__.
 
 ## Install
 
