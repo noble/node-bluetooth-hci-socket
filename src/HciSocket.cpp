@@ -49,19 +49,19 @@ HciSocket::HciSocket() :
 
   this->_socket = socket(AF_BLUETOOTH, SOCK_RAW | SOCK_CLOEXEC, BTPROTO_HCI);
 
-  uv_poll_init(uv_default_loop(), &this->pollHandle, this->_socket);
+  uv_poll_init(uv_default_loop(), &this->_pollHandle, this->_socket);
 
-  this->pollHandle.data = this;
+  this->_pollHandle.data = this;
 }
 
 HciSocket::~HciSocket() {
-  uv_close((uv_handle_t*)&this->pollHandle, (uv_close_cb)HciSocket::PollCloseCallback);
+  uv_close((uv_handle_t*)&this->_pollHandle, (uv_close_cb)HciSocket::PollCloseCallback);
 
   close(this->_socket);
 }
 
 void HciSocket::start() {
-  uv_poll_start(&this->pollHandle, UV_READABLE, HciSocket::PollCallback);
+  uv_poll_start(&this->_pollHandle, UV_READABLE, HciSocket::PollCallback);
 }
 
 void HciSocket::setFilter(char* data, int length) {
@@ -109,7 +109,7 @@ void HciSocket::poll() {
 }
 
 void HciSocket::stop() {
-  uv_poll_stop(&this->pollHandle);
+  uv_poll_stop(&this->_pollHandle);
 }
 
 void HciSocket::write_(char* data, int length) {

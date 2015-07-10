@@ -40,8 +40,7 @@ private:
   v8::Persistent<v8::Object> This;
 
   int _socket;
-
-  uv_poll_t pollHandle;
+  uv_poll_t _pollHandle;
 };
 
 #endif
