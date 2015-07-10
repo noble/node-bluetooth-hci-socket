@@ -1,12 +1,12 @@
-#ifndef ___HCI_SOCKET_H___
-#define ___HCI_SOCKET_H___
+#ifndef ___BLUETOOTH_HCI_SOCKET_H___
+#define ___BLUETOOTH_HCI_SOCKET_H___
 
 #include <node.h>
 
 #include <nan.h>
 
 
-class HciSocket : public node::ObjectWrap {
+class BluetoothHciSocket : public node::ObjectWrap {
 
 public:
   static void Init(v8::Handle<v8::Object> target);
@@ -19,8 +19,8 @@ public:
   static NAN_METHOD(Write);
 
 private:
-  HciSocket();
-  ~HciSocket();
+  BluetoothHciSocket();
+  ~BluetoothHciSocket();
 
   void start();
   void setFilter(char* data, int length);

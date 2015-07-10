@@ -1,9 +1,9 @@
 var events = require('events');
 
 var binding = require('./build/Release/binding.node');
-var HciSocket = binding.HciSocket;
+var BluetoothHciSocket = binding.BluetoothHciSocket;
 
-inherits(HciSocket, events.EventEmitter);
+inherits(BluetoothHciSocket, events.EventEmitter);
 
 // extend prototype
 function inherits(target, source) {
@@ -12,4 +12,4 @@ function inherits(target, source) {
   }
 }
 
-module.exports = HciSocket;
+module.exports = BluetoothHciSocket;

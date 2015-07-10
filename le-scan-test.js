@@ -1,8 +1,8 @@
-var HciSocket = require('./index');
+var BluetoothHciSocket = require('./index');
 
-var hciSocket = new HciSocket();
+var bluetoothHciSocket = new BluetoothHciSocket();
 
-hciSocket.on('data', function(data) {
+bluetoothHciSocket.on('data', function(data) {
   console.log('data: ' + data.toString('hex'));
 
   if (data.readUInt8(0) === HCI_EVENT_PKT) {
@@ -35,7 +35,7 @@ hciSocket.on('data', function(data) {
   }
 });
 
-hciSocket.on('error', function(error) {
+bluetoothHciSocket.on('error', function(error) {
   // TODO: non-BLE adaptor
 
   if (error.message === 'Operation not permitted') {
@@ -77,7 +77,7 @@ function setFilter() {
   filter.writeUInt32LE(eventMask2, 8);
   filter.writeUInt16LE(typeMask, 12);
 
-  hciSocket.setFilter(filter);
+  bluetoothHciSocket.setFilter(filter);
 }
 
 function setScanParameters() {
@@ -97,7 +97,7 @@ function setScanParameters() {
   cmd.writeUInt8(0x00, 9); // own address type: 0 -> public, 1 -> random
   cmd.writeUInt8(0x00, 10); // filter: 0 -> all event types
 
-  hciSocket.write(cmd);
+  bluetoothHciSocket.write(cmd);
 }
 
 function setScanEnable(enabled, duplicates) {
@@ -114,12 +114,12 @@ function setScanEnable(enabled, duplicates) {
   cmd.writeUInt8(enabled ? 0x01 : 0x00, 4); // enable: 0 -> disabled, 1 -> enabled
   cmd.writeUInt8(duplicates ? 0x01 : 0x00, 5); // duplicates: 0 -> no duplicates, 1 -> duplicates
 
-  hciSocket.write(cmd);
+  bluetoothHciSocket.write(cmd);
 }
 
-hciSocket.start();
+bluetoothHciSocket.start();
 setFilter();
-hciSocket.bind();
+bluetoothHciSocket.bind();
 
 setScanEnable(false, true);
 

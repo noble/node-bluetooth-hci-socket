@@ -5,7 +5,7 @@
       'conditions': [
         ['OS=="linux"', {
           'sources': [
-            'src/HciSocket.cpp'
+            'src/BluetoothHciSocket.cpp'
           ]
         }]
       ],

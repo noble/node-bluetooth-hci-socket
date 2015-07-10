@@ -7,7 +7,7 @@
 #include <node_buffer.h>
 #include <nan.h>
 
-#include "HciSocket.h"
+#include "BluetoothHciSocket.h"
 
 #define BTPROTO_HCI 1
 #define SOL_HCI   0
@@ -52,28 +52,28 @@ using v8::FunctionTemplate;
 
 static v8::Persistent<v8::FunctionTemplate> s_ct;
 
-void HciSocket::Init(v8::Handle<v8::Object> target) {
+void BluetoothHciSocket::Init(v8::Handle<v8::Object> target) {
   NanScope();
 
-  v8::Local<v8::FunctionTemplate> t = NanNew<v8::FunctionTemplate>(HciSocket::New);
+  v8::Local<v8::FunctionTemplate> t = NanNew<v8::FunctionTemplate>(BluetoothHciSocket::New);
 
   NanAssignPersistent(s_ct, t);
 
-  NanNew(s_ct)->SetClassName(NanNew("HciSocket"));
+  NanNew(s_ct)->SetClassName(NanNew("BluetoothHciSocket"));
 
   NanNew(s_ct)->InstanceTemplate()->SetInternalFieldCount(1);
 
-  NODE_SET_PROTOTYPE_METHOD(NanNew(s_ct), "start", HciSocket::Start);
-  NODE_SET_PROTOTYPE_METHOD(NanNew(s_ct), "setFilter", HciSocket::SetFilter);
-  NODE_SET_PROTOTYPE_METHOD(NanNew(s_ct), "bind", HciSocket::Bind);
-  NODE_SET_PROTOTYPE_METHOD(NanNew(s_ct), "stop", HciSocket::Stop);
+  NODE_SET_PROTOTYPE_METHOD(NanNew(s_ct), "start", BluetoothHciSocket::Start);
+  NODE_SET_PROTOTYPE_METHOD(NanNew(s_ct), "setFilter", BluetoothHciSocket::SetFilter);
+  NODE_SET_PROTOTYPE_METHOD(NanNew(s_ct), "bind", BluetoothHciSocket::Bind);
+  NODE_SET_PROTOTYPE_METHOD(NanNew(s_ct), "stop", BluetoothHciSocket::Stop);
 
-  NODE_SET_PROTOTYPE_METHOD(NanNew(s_ct), "write", HciSocket::Write);
+  NODE_SET_PROTOTYPE_METHOD(NanNew(s_ct), "write", BluetoothHciSocket::Write);
 
-  target->Set(NanNew("HciSocket"), NanNew(s_ct)->GetFunction());
+  target->Set(NanNew("BluetoothHciSocket"), NanNew(s_ct)->GetFunction());
 }
 
-HciSocket::HciSocket() :
+BluetoothHciSocket::BluetoothHciSocket() :
   node::ObjectWrap() {
 
   this->_socket = socket(AF_BLUETOOTH, SOCK_RAW | SOCK_CLOEXEC, BTPROTO_HCI);
@@ -83,23 +83,23 @@ HciSocket::HciSocket() :
   this->_pollHandle.data = this;
 }
 
-HciSocket::~HciSocket() {
-  uv_close((uv_handle_t*)&this->_pollHandle, (uv_close_cb)HciSocket::PollCloseCallback);
+BluetoothHciSocket::~BluetoothHciSocket() {
+  uv_close((uv_handle_t*)&this->_pollHandle, (uv_close_cb)BluetoothHciSocket::PollCloseCallback);
 
   close(this->_socket);
 }
 
-void HciSocket::start() {
-  uv_poll_start(&this->_pollHandle, UV_READABLE, HciSocket::PollCallback);
+void BluetoothHciSocket::start() {
+  uv_poll_start(&this->_pollHandle, UV_READABLE, BluetoothHciSocket::PollCallback);
 }
 
-void HciSocket::setFilter(char* data, int length) {
+void BluetoothHciSocket::setFilter(char* data, int length) {
   if (setsockopt(this->_socket, SOL_HCI, HCI_FILTER, data, length) < 0) {
     this->emitErrnoError();
   }
 }
 
-void HciSocket::bind_() {
+void BluetoothHciSocket::bind_() {
   struct sockaddr_hci a;
 
   memset(&a, 0, sizeof(a));
@@ -128,7 +128,7 @@ void HciSocket::bind_() {
   bind(this->_socket, (struct sockaddr *) &a, sizeof(a));
 }
 
-void HciSocket::poll() {
+void BluetoothHciSocket::poll() {
   int length = 0;
   char data[1024];
 
@@ -156,17 +156,17 @@ void HciSocket::poll() {
   }
 }
 
-void HciSocket::stop() {
+void BluetoothHciSocket::stop() {
   uv_poll_stop(&this->_pollHandle);
 }
 
-void HciSocket::write_(char* data, int length) {
+void BluetoothHciSocket::write_(char* data, int length) {
   if (write(this->_socket, data, length) < 0) {
     this->emitErrnoError();
   }
 }
 
-void HciSocket::emitErrnoError() {
+void BluetoothHciSocket::emitErrnoError() {
   v8::Handle<v8::Object> globalObj = NanGetCurrentContext()->Global();
   v8::Handle<v8::Function> errorConstructor = v8::Local<v8::Function>::Cast(globalObj->Get(NanNew<String>("Error")));
 
@@ -184,28 +184,29 @@ void HciSocket::emitErrnoError() {
   NanMakeCallback(NanNew<v8::Object>(this->This), NanNew("emit"), 2, argv);
 }
 
-NAN_METHOD(HciSocket::New) {
+NAN_METHOD(BluetoothHciSocket::New) {
   NanScope();
 
-  HciSocket* p = new HciSocket();
+  BluetoothHciSocket* p = new BluetoothHciSocket();
   p->Wrap(args.This());
   NanAssignPersistent(p->This, args.This());
   NanReturnValue(args.This());
 }
 
-NAN_METHOD(HciSocket::Start) {
+NAN_METHOD(BluetoothHciSocket::Start) {
   NanScope();
 
-  HciSocket* p = node::ObjectWrap::Unwrap<HciSocket>(args.This());
+  BluetoothHciSocket* p = node::ObjectWrap::Unwrap<BluetoothHciSocket>(args.This());
 
   p->start();
 
   NanReturnValue (NanUndefined());
 }
 
-NAN_METHOD(HciSocket::SetFilter) {
+NAN_METHOD(BluetoothHciSocket::SetFilter) {
   NanScope();
-  HciSocket* p = node::ObjectWrap::Unwrap<HciSocket>(args.This());
+
+  BluetoothHciSocket* p = node::ObjectWrap::Unwrap<BluetoothHciSocket>(args.This());
 
   if (args.Length() > 0) {
     v8::Handle<v8::Value> arg0 = args[0];
@@ -217,29 +218,29 @@ NAN_METHOD(HciSocket::SetFilter) {
   NanReturnValue (NanUndefined());
 }
 
-NAN_METHOD(HciSocket::Bind) {
+NAN_METHOD(BluetoothHciSocket::Bind) {
   NanScope();
 
-  HciSocket* p = node::ObjectWrap::Unwrap<HciSocket>(args.This());
+  BluetoothHciSocket* p = node::ObjectWrap::Unwrap<BluetoothHciSocket>(args.This());
 
   p->bind_();
 
   NanReturnValue (NanUndefined());
 }
 
-NAN_METHOD(HciSocket::Stop) {
+NAN_METHOD(BluetoothHciSocket::Stop) {
   NanScope();
 
-  HciSocket* p = node::ObjectWrap::Unwrap<HciSocket>(args.This());
+  BluetoothHciSocket* p = node::ObjectWrap::Unwrap<BluetoothHciSocket>(args.This());
 
   p->stop();
 
   NanReturnValue (NanUndefined());
 }
 
-NAN_METHOD(HciSocket::Write) {
+NAN_METHOD(BluetoothHciSocket::Write) {
   NanScope();
-  HciSocket* p = node::ObjectWrap::Unwrap<HciSocket>(args.This());
+  BluetoothHciSocket* p = node::ObjectWrap::Unwrap<BluetoothHciSocket>(args.This());
 
   if (args.Length() > 0) {
     v8::Handle<v8::Value> arg0 = args[0];
@@ -253,20 +254,20 @@ NAN_METHOD(HciSocket::Write) {
 }
 
 
-void HciSocket::PollCloseCallback(uv_poll_t* handle) {
+void BluetoothHciSocket::PollCloseCallback(uv_poll_t* handle) {
   delete handle;
 }
 
-void HciSocket::PollCallback(uv_poll_t* handle, int status, int events) {
-  HciSocket *hciSocket = (HciSocket*)handle->data;
+void BluetoothHciSocket::PollCallback(uv_poll_t* handle, int status, int events) {
+  BluetoothHciSocket *p = (BluetoothHciSocket*)handle->data;
 
-  hciSocket->poll();
+  p->poll();
 }
 
 extern "C" {
 
   static void init (v8::Handle<v8::Object> target) {
-    HciSocket::Init(target);
+    BluetoothHciSocket::Init(target);
   }
 
   NODE_MODULE(binding, init);
