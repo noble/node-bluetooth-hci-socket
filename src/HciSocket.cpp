@@ -35,7 +35,7 @@ void HciSocket::Init(v8::Handle<v8::Object> target) {
   NanNew(s_ct)->InstanceTemplate()->SetInternalFieldCount(1);
 
   NODE_SET_PROTOTYPE_METHOD(NanNew(s_ct), "start", HciSocket::Start);
-  NODE_SET_PROTOTYPE_METHOD(NanNew(s_ct), "filter", HciSocket::Filter);
+  NODE_SET_PROTOTYPE_METHOD(NanNew(s_ct), "setFilter", HciSocket::SetFilter);
   NODE_SET_PROTOTYPE_METHOD(NanNew(s_ct), "bind", HciSocket::Bind);
   NODE_SET_PROTOTYPE_METHOD(NanNew(s_ct), "stop", HciSocket::Stop);
 
@@ -64,7 +64,7 @@ void HciSocket::start() {
   uv_poll_start(&this->pollHandle, UV_READABLE, HciSocket::PollCallback);
 }
 
-void HciSocket::filter(char* data, int length) {
+void HciSocket::setFilter(char* data, int length) {
   if (setsockopt(this->_socket, SOL_HCI, HCI_FILTER, data, length) < 0) {
     this->emitErrnoError();
   }
@@ -155,15 +155,14 @@ NAN_METHOD(HciSocket::Start) {
   NanReturnValue (NanUndefined());
 }
 
-NAN_METHOD(HciSocket::Filter) {
+NAN_METHOD(HciSocket::SetFilter) {
   NanScope();
   HciSocket* p = node::ObjectWrap::Unwrap<HciSocket>(args.This());
 
   if (args.Length() > 0) {
     v8::Handle<v8::Value> arg0 = args[0];
     if (arg0->IsObject()) {
-
-      p->filter(node::Buffer::Data(arg0), node::Buffer::Length(arg0));
+      p->setFilter(node::Buffer::Data(arg0), node::Buffer::Length(arg0));
     }
   }
 

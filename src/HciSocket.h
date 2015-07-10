@@ -12,7 +12,7 @@ public:
   static void Init(v8::Handle<v8::Object> target);
 
   static NAN_METHOD(New);
-  static NAN_METHOD(Filter);
+  static NAN_METHOD(SetFilter);
   static NAN_METHOD(Bind);
   static NAN_METHOD(Start);
   static NAN_METHOD(Stop);
@@ -23,7 +23,7 @@ private:
   ~HciSocket();
 
   void start();
-  void filter(char* data, int length);
+  void setFilter(char* data, int length);
   void bind_();
   void stop();
 
