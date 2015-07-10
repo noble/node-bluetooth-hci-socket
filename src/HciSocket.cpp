@@ -1,4 +1,5 @@
 #include <errno.h>
+#include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -12,10 +13,38 @@
 #define SOL_HCI   0
 #define HCI_FILTER  2
 
+#define HCIGETDEVLIST _IOR('H', 210, int)
+
+#define HCI_MAX_DEV 16
+
+enum {
+  HCI_UP,
+  HCI_INIT,
+  HCI_RUNNING,
+
+  HCI_PSCAN,
+  HCI_ISCAN,
+  HCI_AUTH,
+  HCI_ENCRYPT,
+  HCI_INQUIRY,
+
+  HCI_RAW,
+};
+
 struct sockaddr_hci {
   sa_family_t     hci_family;
   unsigned short  hci_dev;
   unsigned short  hci_channel;
+};
+
+struct hci_dev_req {
+  uint16_t dev_id;
+  uint32_t dev_opt;
+};
+
+struct hci_dev_list_req {
+  uint16_t dev_num;
+  struct hci_dev_req dev_req[0];
 };
 
 using namespace v8;
@@ -75,7 +104,26 @@ void HciSocket::bind_() {
 
   memset(&a, 0, sizeof(a));
   a.hci_family = AF_BLUETOOTH;
-  a.hci_dev = 0; // TODO: find default device id
+  a.hci_dev = 0; // default
+
+  struct hci_dev_list_req *dl;
+  struct hci_dev_req *dr;
+
+  dl = (hci_dev_list_req*)calloc(HCI_MAX_DEV * sizeof(*dr) + sizeof(*dl), 1);
+  dr = dl->dev_req;
+
+  dl->dev_num = HCI_MAX_DEV;
+
+  if (ioctl(this->_socket, HCIGETDEVLIST, dl) > -1) {
+    for (int i = 0; i < dl->dev_num; i++, dr++) {
+      if (dr->dev_opt & (1 << HCI_UP)) {
+        // choose the first device that is up
+        // later on, it would be good to also HCIGETDEVINFO and check the HCI_RAW flag
+        a.hci_dev = dr->dev_id;
+        break;
+      }
+    }
+  }
 
   bind(this->_socket, (struct sockaddr *) &a, sizeof(a));
 }
