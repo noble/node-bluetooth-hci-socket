@@ -1,4 +1,4 @@
-var BluetoothHciSocket = require('./index');
+var BluetoothHciSocket = require('../index');
 
 var bluetoothHciSocket = new BluetoothHciSocket();
 
