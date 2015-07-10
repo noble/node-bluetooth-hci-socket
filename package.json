@@ -19,5 +19,11 @@
   "bugs": {
     "url": "https://github.com/sandeepmistry/node-hci-socket/issues"
   },
-  "homepage": "https://github.com/sandeepmistry/node-hci-socket"
+  "homepage": "https://github.com/sandeepmistry/node-hci-socket",
+  "os": [
+    "linux"
+  ],
+  "dependencies": {
+    "nan": "^1.8.4"
+  }
 }
