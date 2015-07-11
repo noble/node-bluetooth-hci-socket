@@ -22,7 +22,7 @@ bluetoothHciSocket.on('data', function(data) {
         var gapAddrType = data.readUInt8(6);
         var gapAddr = data.slice(7, 13);
 
-        var eir = data.slice(14, data.length - 2);
+        var eir = data.slice(14, data.length - 1);
         var rssi = data.readInt8(data.length - 1);
 
         console.log('LE Advertising Report');
@@ -78,7 +78,7 @@ function setFilter() {
   filter.writeUInt32LE(typeMask, 0);
   filter.writeUInt32LE(eventMask1, 4);
   filter.writeUInt32LE(eventMask2, 8);
-  filter.writeUInt16LE(typeMask, 12);
+  filter.writeUInt16LE(opcode, 12);
 
   bluetoothHciSocket.setFilter(filter);
 }

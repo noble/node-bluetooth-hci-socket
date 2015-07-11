@@ -59,7 +59,6 @@ bluetoothHciSocket.on('data', function(data) {
     }
   } else if (data.readUInt8(0) === HCI_ACLDATA_PKT) {
     if ( ((data.readUInt16LE(1) >> 12) === ACL_START) &&
-         (data.readUInt16LE(3) === 0x0007) &&
           (data.readUInt16LE(7) === ATT_CID) ) {
 
       var handle = data.readUInt16LE(1) & 0x0fff;
@@ -168,8 +167,8 @@ function writeHandle(handle, data) {
   // header
   cmd.writeUInt8(HCI_ACLDATA_PKT, 0);
   cmd.writeUInt16LE(handle, 1);
-  cmd.writeUInt16LE(0x0007, 3); // HCI length ???
-  cmd.writeUInt16LE(data.length, 5); // data length
+  cmd.writeUInt16LE(data.length + 4, 3); // data length 1
+  cmd.writeUInt16LE(data.length, 5); // data length 2
   cmd.writeUInt16LE(ATT_CID, 7);
 
   data.copy(cmd, 9);
