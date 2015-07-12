@@ -12,8 +12,9 @@ public:
   static void Init(v8::Handle<v8::Object> target);
 
   static NAN_METHOD(New);
-  static NAN_METHOD(SetFilter);
   static NAN_METHOD(Bind);
+  static NAN_METHOD(SetFilter);
+  static NAN_METHOD(IsDevUp);
   static NAN_METHOD(Start);
   static NAN_METHOD(Stop);
   static NAN_METHOD(Write);
@@ -23,8 +24,9 @@ private:
   ~BluetoothHciSocket();
 
   void start();
-  void setFilter(char* data, int length);
   void bind_();
+  bool isDevUp();
+  void setFilter(char* data, int length);
   void stop();
 
   void write_(char* data, int length);
@@ -40,6 +42,7 @@ private:
   v8::Persistent<v8::Object> This;
 
   int _socket;
+  int _devId;
   uv_poll_t _pollHandle;
 };
 

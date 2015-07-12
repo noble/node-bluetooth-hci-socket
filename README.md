@@ -40,6 +40,14 @@ bluetoothHciSocket.setFilter(filter);
 bluetoothHciSocket.bind();
 ```
 
+#### Is Device Up
+
+Query the device state. __Note:__ must be called after ```bind```.
+
+```
+bluetoothHciSocket.isDevUp(); // returns: true or false
+```
+
 #### Start/stop
 
 Start or stop event handling:

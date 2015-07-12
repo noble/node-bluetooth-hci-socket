@@ -14,6 +14,7 @@
 #define HCI_FILTER  2
 
 #define HCIGETDEVLIST _IOR('H', 210, int)
+#define HCIGETDEVINFO _IOR('H', 211, int)
 
 #define HCI_MAX_DEV 16
 
@@ -47,6 +48,40 @@ struct hci_dev_list_req {
   struct hci_dev_req dev_req[0];
 };
 
+
+struct hci_dev_info {
+  uint16_t dev_id;
+  char     name[8];
+
+  char     bdaddr[6];
+
+  uint32_t flags;
+  uint8_t  type;
+
+  uint8_t  features[8];
+
+  uint32_t pkt_type;
+  uint32_t link_policy;
+  uint32_t link_mode;
+
+  uint16_t acl_mtu;
+  uint16_t acl_pkts;
+  uint16_t sco_mtu;
+  uint16_t sco_pkts;
+
+  // hci_dev_stats
+  uint32_t err_rx;
+  uint32_t err_tx;
+  uint32_t cmd_tx;
+  uint32_t evt_rx;
+  uint32_t acl_tx;
+  uint32_t acl_rx;
+  uint32_t sco_tx;
+  uint32_t sco_rx;
+  uint32_t byte_rx;
+  uint32_t byte_tx;
+};
+
 using namespace v8;
 using v8::FunctionTemplate;
 
@@ -64,8 +99,9 @@ void BluetoothHciSocket::Init(v8::Handle<v8::Object> target) {
   NanNew(s_ct)->InstanceTemplate()->SetInternalFieldCount(1);
 
   NODE_SET_PROTOTYPE_METHOD(NanNew(s_ct), "start", BluetoothHciSocket::Start);
-  NODE_SET_PROTOTYPE_METHOD(NanNew(s_ct), "setFilter", BluetoothHciSocket::SetFilter);
   NODE_SET_PROTOTYPE_METHOD(NanNew(s_ct), "bind", BluetoothHciSocket::Bind);
+  NODE_SET_PROTOTYPE_METHOD(NanNew(s_ct), "isDevUp", BluetoothHciSocket::IsDevUp);
+  NODE_SET_PROTOTYPE_METHOD(NanNew(s_ct), "setFilter", BluetoothHciSocket::SetFilter);
   NODE_SET_PROTOTYPE_METHOD(NanNew(s_ct), "stop", BluetoothHciSocket::Stop);
 
   NODE_SET_PROTOTYPE_METHOD(NanNew(s_ct), "write", BluetoothHciSocket::Write);
@@ -91,12 +127,6 @@ BluetoothHciSocket::~BluetoothHciSocket() {
 
 void BluetoothHciSocket::start() {
   uv_poll_start(&this->_pollHandle, UV_READABLE, BluetoothHciSocket::PollCallback);
-}
-
-void BluetoothHciSocket::setFilter(char* data, int length) {
-  if (setsockopt(this->_socket, SOL_HCI, HCI_FILTER, data, length) < 0) {
-    this->emitErrnoError();
-  }
 }
 
 void BluetoothHciSocket::bind_() {
@@ -125,7 +155,29 @@ void BluetoothHciSocket::bind_() {
     }
   }
 
+  this->_devId = a.hci_dev;
+
   bind(this->_socket, (struct sockaddr *) &a, sizeof(a));
+}
+
+bool  BluetoothHciSocket::isDevUp() {
+  struct hci_dev_info di;
+  bool isUp = false;
+
+  memset(&di, 0x00, sizeof(di));
+  di.dev_id = this->_devId;
+
+  if (ioctl(this->_socket, HCIGETDEVINFO, (void *)&di) > -1) {
+    isUp = (di.flags & (1 << HCI_UP)) != 0;
+  }
+
+  return isUp;
+}
+
+void BluetoothHciSocket::setFilter(char* data, int length) {
+  if (setsockopt(this->_socket, SOL_HCI, HCI_FILTER, data, length) < 0) {
+    this->emitErrnoError();
+  }
 }
 
 void BluetoothHciSocket::poll() {
@@ -203,6 +255,26 @@ NAN_METHOD(BluetoothHciSocket::Start) {
   NanReturnValue (NanUndefined());
 }
 
+NAN_METHOD(BluetoothHciSocket::Bind) {
+  NanScope();
+
+  BluetoothHciSocket* p = node::ObjectWrap::Unwrap<BluetoothHciSocket>(args.This());
+
+  p->bind_();
+
+  NanReturnValue (NanUndefined());
+}
+
+NAN_METHOD(BluetoothHciSocket::IsDevUp) {
+  NanScope();
+
+  BluetoothHciSocket* p = node::ObjectWrap::Unwrap<BluetoothHciSocket>(args.This());
+
+  bool isDevUp = p->isDevUp();
+
+  NanReturnValue (isDevUp ? NanTrue() : NanFalse());
+}
+
 NAN_METHOD(BluetoothHciSocket::SetFilter) {
   NanScope();
 
@@ -214,16 +286,6 @@ NAN_METHOD(BluetoothHciSocket::SetFilter) {
       p->setFilter(node::Buffer::Data(arg0), node::Buffer::Length(arg0));
     }
   }
-
-  NanReturnValue (NanUndefined());
-}
-
-NAN_METHOD(BluetoothHciSocket::Bind) {
-  NanScope();
-
-  BluetoothHciSocket* p = node::ObjectWrap::Unwrap<BluetoothHciSocket>(args.This());
-
-  p->bind_();
 
   NanReturnValue (NanUndefined());
 }
