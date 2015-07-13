@@ -5,6 +5,9 @@
 
 #include <nan.h>
 
+typedef struct {
+  uint8_t b[6];
+} __attribute__((packed)) bdaddr_t;
 
 class BluetoothHciSocket : public node::ObjectWrap {
 
@@ -13,8 +16,9 @@ public:
 
   static NAN_METHOD(New);
   static NAN_METHOD(Bind);
-  static NAN_METHOD(SetFilter);
+  static NAN_METHOD(GetAddressBytes);
   static NAN_METHOD(IsDevUp);
+  static NAN_METHOD(SetFilter);
   static NAN_METHOD(Start);
   static NAN_METHOD(Stop);
   static NAN_METHOD(Write);
@@ -25,6 +29,7 @@ private:
 
   void start();
   void bind_();
+  bdaddr_t getAddressBytes();
   bool isDevUp();
   void setFilter(char* data, int length);
   void stop();

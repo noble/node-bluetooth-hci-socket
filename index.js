@@ -12,4 +12,12 @@ function inherits(target, source) {
   }
 }
 
+BluetoothHciSocket.prototype.getAddress = function() {
+  return this.getAddressBytes().toString('hex').match(/.{1,2}/g).reverse().join(':');
+};
+
+BluetoothHciSocket.prototype.getAddressType = function() {
+  return 'public';
+};
+
 module.exports = BluetoothHciSocket;

@@ -48,12 +48,11 @@ struct hci_dev_list_req {
   struct hci_dev_req dev_req[0];
 };
 
-
 struct hci_dev_info {
   uint16_t dev_id;
   char     name[8];
 
-  char     bdaddr[6];
+  bdaddr_t bdaddr;
 
   uint32_t flags;
   uint8_t  type;
@@ -100,6 +99,7 @@ void BluetoothHciSocket::Init(v8::Handle<v8::Object> target) {
 
   NODE_SET_PROTOTYPE_METHOD(NanNew(s_ct), "start", BluetoothHciSocket::Start);
   NODE_SET_PROTOTYPE_METHOD(NanNew(s_ct), "bind", BluetoothHciSocket::Bind);
+  NODE_SET_PROTOTYPE_METHOD(NanNew(s_ct), "getAddressBytes", BluetoothHciSocket::GetAddressBytes);
   NODE_SET_PROTOTYPE_METHOD(NanNew(s_ct), "isDevUp", BluetoothHciSocket::IsDevUp);
   NODE_SET_PROTOTYPE_METHOD(NanNew(s_ct), "setFilter", BluetoothHciSocket::SetFilter);
   NODE_SET_PROTOTYPE_METHOD(NanNew(s_ct), "stop", BluetoothHciSocket::Stop);
@@ -158,6 +158,20 @@ void BluetoothHciSocket::bind_() {
   this->_devId = a.hci_dev;
 
   bind(this->_socket, (struct sockaddr *) &a, sizeof(a));
+}
+
+bdaddr_t BluetoothHciSocket::getAddressBytes() {
+  bdaddr_t bdaddr;
+  struct hci_dev_info di;
+
+  memset(&di, 0x00, sizeof(di));
+  di.dev_id = this->_devId;
+
+  if (ioctl(this->_socket, HCIGETDEVINFO, (void *)&di) > -1) {
+    memcpy(&bdaddr, &di.bdaddr, sizeof(bdaddr));
+  }
+
+  return bdaddr;
 }
 
 bool  BluetoothHciSocket::isDevUp() {
@@ -263,6 +277,16 @@ NAN_METHOD(BluetoothHciSocket::Bind) {
   p->bind_();
 
   NanReturnValue (NanUndefined());
+}
+
+NAN_METHOD(BluetoothHciSocket::GetAddressBytes) {
+  NanScope();
+
+  BluetoothHciSocket* p = node::ObjectWrap::Unwrap<BluetoothHciSocket>(args.This());
+
+  bdaddr_t bdaddr = p->getAddressBytes();
+
+  NanReturnValue (NanNewBufferHandle((char*)&bdaddr, sizeof(bdaddr)));
 }
 
 NAN_METHOD(BluetoothHciSocket::IsDevUp) {

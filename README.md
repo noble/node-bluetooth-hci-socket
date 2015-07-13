@@ -40,12 +40,28 @@ bluetoothHciSocket.setFilter(filter);
 bluetoothHciSocket.bind();
 ```
 
+#### Address
+
+Get the device (Bluetooth/BT) address. __Note:__ must be called after ```bind```.
+
+```
+var btAddress = bluetoothHciSocket.getAddress();
+```
+
+#### Address Type
+
+Get the device (Bluetooth/BT) address type. __Note:__ must be called after ```bind```.
+
+```
+var btAddressType = bluetoothHciSocket.getAddressType(); // returns: 'public' or 'random'
+```
+
 #### Is Device Up
 
 Query the device state. __Note:__ must be called after ```bind```.
 
 ```
-bluetoothHciSocket.isDevUp(); // returns: true or false
+var isDevUp = bluetoothHciSocket.isDevUp(); // returns: true or false
 ```
 
 #### Start/stop
