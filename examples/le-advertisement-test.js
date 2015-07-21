@@ -209,7 +209,7 @@ function setAdvertiseEnable(enabled) {
 
 bluetoothHciSocket.start();
 setFilter();
-bluetoothHciSocket.bind();
+bluetoothHciSocket.bindRaw();
 
 console.log('address = ' + bluetoothHciSocket.getAddress());
 console.log('address type = ' + bluetoothHciSocket.getAddressType());

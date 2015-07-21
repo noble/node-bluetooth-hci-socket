@@ -16,6 +16,11 @@
 #define HCIGETDEVLIST _IOR('H', 210, int)
 #define HCIGETDEVINFO _IOR('H', 211, int)
 
+#define HCI_CHANNEL_RAW   0
+#define HCI_CHANNEL_CONTROL 3
+
+#define HCI_DEV_NONE  0xffff
+
 #define HCI_MAX_DEV 16
 
 enum {
@@ -98,7 +103,8 @@ void BluetoothHciSocket::Init(v8::Handle<v8::Object> target) {
   NanNew(s_ct)->InstanceTemplate()->SetInternalFieldCount(1);
 
   NODE_SET_PROTOTYPE_METHOD(NanNew(s_ct), "start", BluetoothHciSocket::Start);
-  NODE_SET_PROTOTYPE_METHOD(NanNew(s_ct), "bind", BluetoothHciSocket::Bind);
+  NODE_SET_PROTOTYPE_METHOD(NanNew(s_ct), "bindRaw", BluetoothHciSocket::BindRaw);
+  NODE_SET_PROTOTYPE_METHOD(NanNew(s_ct), "bindControl", BluetoothHciSocket::BindControl);
   NODE_SET_PROTOTYPE_METHOD(NanNew(s_ct), "getAddressBytes", BluetoothHciSocket::GetAddressBytes);
   NODE_SET_PROTOTYPE_METHOD(NanNew(s_ct), "isDevUp", BluetoothHciSocket::IsDevUp);
   NODE_SET_PROTOTYPE_METHOD(NanNew(s_ct), "setFilter", BluetoothHciSocket::SetFilter);
@@ -129,12 +135,13 @@ void BluetoothHciSocket::start() {
   uv_poll_start(&this->_pollHandle, UV_READABLE, BluetoothHciSocket::PollCallback);
 }
 
-void BluetoothHciSocket::bind_() {
+void BluetoothHciSocket::bindRaw() {
   struct sockaddr_hci a;
 
   memset(&a, 0, sizeof(a));
   a.hci_family = AF_BLUETOOTH;
   a.hci_dev = 0; // default
+  a.hci_channel = HCI_CHANNEL_RAW;
 
   struct hci_dev_list_req *dl;
   struct hci_dev_req *dr;
@@ -155,10 +162,24 @@ void BluetoothHciSocket::bind_() {
     }
   }
 
+  free(dl);
+
   this->_devId = a.hci_dev;
 
   bind(this->_socket, (struct sockaddr *) &a, sizeof(a));
 }
+
+void BluetoothHciSocket::bindControl() {
+  struct sockaddr_hci a;
+
+  memset(&a, 0, sizeof(a));
+  a.hci_family = AF_BLUETOOTH;
+  a.hci_dev = HCI_DEV_NONE;
+  a.hci_channel = HCI_CHANNEL_CONTROL;
+
+  bind(this->_socket, (struct sockaddr *) &a, sizeof(a));
+}
+
 
 bdaddr_t BluetoothHciSocket::getAddressBytes() {
   bdaddr_t bdaddr;
@@ -269,12 +290,22 @@ NAN_METHOD(BluetoothHciSocket::Start) {
   NanReturnValue (NanUndefined());
 }
 
-NAN_METHOD(BluetoothHciSocket::Bind) {
+NAN_METHOD(BluetoothHciSocket::BindRaw) {
   NanScope();
 
   BluetoothHciSocket* p = node::ObjectWrap::Unwrap<BluetoothHciSocket>(args.This());
 
-  p->bind_();
+  p->bindRaw();
+
+  NanReturnValue (NanUndefined());
+}
+
+NAN_METHOD(BluetoothHciSocket::BindControl) {
+  NanScope();
+
+  BluetoothHciSocket* p = node::ObjectWrap::Unwrap<BluetoothHciSocket>(args.This());
+
+  p->bindControl();
 
   NanReturnValue (NanUndefined());
 }

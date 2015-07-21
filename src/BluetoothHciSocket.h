@@ -15,7 +15,8 @@ public:
   static void Init(v8::Handle<v8::Object> target);
 
   static NAN_METHOD(New);
-  static NAN_METHOD(Bind);
+  static NAN_METHOD(BindRaw);
+  static NAN_METHOD(BindControl);
   static NAN_METHOD(GetAddressBytes);
   static NAN_METHOD(IsDevUp);
   static NAN_METHOD(SetFilter);
@@ -28,7 +29,8 @@ private:
   ~BluetoothHciSocket();
 
   void start();
-  void bind_();
+  void bindRaw();
+  void bindControl();
   bdaddr_t getAddressBytes();
   bool isDevUp();
   void setFilter(char* data, int length);

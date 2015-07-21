@@ -36,13 +36,21 @@ bluetoothHciSocket.setFilter(filter);
 
 #### Bind
 
+##### Raw Channel
+
 ```javascript
-bluetoothHciSocket.bind();
+bluetoothHciSocket.bindRaw();
+```
+
+##### Control Channel
+
+```javascript
+bluetoothHciSocket.bindControl();
 ```
 
 #### Address
 
-Get the device (Bluetooth/BT) address. __Note:__ must be called after ```bind```.
+Get the device (Bluetooth/BT) address. __Note:__ must be called after ```bindRaw```.
 
 ```
 var btAddress = bluetoothHciSocket.getAddress();
@@ -50,7 +58,7 @@ var btAddress = bluetoothHciSocket.getAddress();
 
 #### Address Type
 
-Get the device (Bluetooth/BT) address type. __Note:__ must be called after ```bind```.
+Get the device (Bluetooth/BT) address type. __Note:__ must be called after ```bindRaw```.
 
 ```
 var btAddressType = bluetoothHciSocket.getAddressType(); // returns: 'public' or 'random'
@@ -58,7 +66,7 @@ var btAddressType = bluetoothHciSocket.getAddressType(); // returns: 'public' or
 
 #### Is Device Up
 
-Query the device state. __Note:__ must be called after ```bind```.
+Query the device state. __Note:__ must be called after ```bindRaw```.
 
 ```
 var isDevUp = bluetoothHciSocket.isDevUp(); // returns: true or false
