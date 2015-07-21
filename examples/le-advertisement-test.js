@@ -24,6 +24,56 @@ bluetoothHciSocket.on('data', function(data) {
           console.log('LE Advertise Enable Set');
         }
       }
+    } else if (data.readUInt8(1) === EVT_DISCONN_COMPLETE) {
+      var status = data.readUInt8(3);
+      var handle = data.readUInt16LE(4);
+      var reason = data.readUInt8(6);
+
+      console.log('Disconn Complete');
+      console.log('\t' + status);
+      console.log('\t' + handle);
+      console.log('\t' + reason);
+
+      process.exit(0);
+    } else if (data.readUInt8(1) === EVT_LE_META_EVENT) {
+      if (data.readUInt8(3) === EVT_LE_CONN_COMPLETE) { // subevent
+        var status = data.readUInt8(4);
+        var handle = data.readUInt16LE(5);
+        var role = data.readUInt8(7);
+        var peerBdAddrType = data.readUInt8(8);
+        var peerBdAddr = data.slice(9, 15);
+        var interval = data.readUInt16LE(15);
+        var latency = data.readUInt16LE(17);
+        var supervisionTimeout = data.readUInt16LE(19);
+        var masterClockAccuracy = data.readUInt8(21);
+
+        console.log('LE Connection Complete');
+        console.log('\t' + status);
+        console.log('\t' + handle);
+        console.log('\t' + role);
+        console.log('\t' + ['PUBLIC', 'RANDOM'][peerBdAddrType]);
+        console.log('\t' + peerBdAddr.toString('hex').match(/.{1,2}/g).reverse().join(':'));
+        console.log('\t' + interval * 1.25);
+        console.log('\t' + latency);
+        console.log('\t' + supervisionTimeout * 10);
+        console.log('\t' + masterClockAccuracy);
+
+        setAdvertiseEnable(true);
+      } else if (data.readUInt8(3) === EVT_LE_CONN_UPDATE_COMPLETE) {
+        var status = data.readUInt8(4);
+        var handle = data.readUInt16LE(5);
+        var interval = data.readUInt16LE(7);
+        var latency = data.readUInt16LE(9);
+        var supervisionTimeout = data.readUInt16LE(11);
+
+        console.log('LE Connection Update Complete');
+        console.log('\t' + status);
+        console.log('\t' + handle);
+
+        console.log('\t' + interval * 1.25);
+        console.log('\t' + latency);
+        console.log('\t' + supervisionTimeout * 10);
+      }
     }
   }
 });
@@ -44,8 +94,13 @@ var HCI_COMMAND_PKT = 0x01;
 var HCI_ACLDATA_PKT = 0x02;
 var HCI_EVENT_PKT = 0x04;
 
+var EVT_DISCONN_COMPLETE = 0x05;
 var EVT_CMD_COMPLETE = 0x0e;
 var EVT_CMD_STATUS = 0x0f;
+var EVT_LE_META_EVENT = 0x3e;
+
+var EVT_LE_CONN_COMPLETE = 0x01;
+var EVT_LE_CONN_UPDATE_COMPLETE = 0x03;
 
 var OGF_LE_CTL = 0x08;
 var OCF_LE_SET_ADVERTISING_PARAMETERS = 0x0006;
@@ -63,8 +118,8 @@ var HCI_SUCCESS = 0;
 function setFilter() {
   var filter = new Buffer(14);
   var typeMask = (1 << HCI_EVENT_PKT) | (1 << HCI_ACLDATA_PKT);
-  var eventMask1 = (1 << EVT_CMD_COMPLETE) | (1 << EVT_CMD_STATUS);
-  var eventMask2 = 0;
+  var eventMask1 = (1 << EVT_DISCONN_COMPLETE) | (1 << EVT_CMD_COMPLETE) | (1 << EVT_CMD_STATUS);
+  var eventMask2 = (1 << (EVT_LE_META_EVENT - 32));
   var opcode = 0;
 
   filter.writeUInt32LE(typeMask, 0);
