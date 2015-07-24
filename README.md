@@ -39,7 +39,7 @@ bluetoothHciSocket.setFilter(filter);
 ##### Raw Channel
 
 ```javascript
-bluetoothHciSocket.bindRaw();
+bluetoothHciSocket.bindRaw([deviceId]); // optional deviceId (integer)
 ```
 
 ##### Control Channel
