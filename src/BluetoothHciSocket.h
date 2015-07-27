@@ -30,7 +30,7 @@ private:
   ~BluetoothHciSocket();
 
   void start();
-  void bindRaw();
+  void bindRaw(int* devId);
   void bindControl();
   void bindUser();
   bdaddr_t getAddressBytes();

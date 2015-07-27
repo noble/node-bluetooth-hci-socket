@@ -138,7 +138,7 @@ void BluetoothHciSocket::start() {
   uv_poll_start(&this->_pollHandle, UV_READABLE, BluetoothHciSocket::PollCallback);
 }
 
-void BluetoothHciSocket::bindRaw() {
+void BluetoothHciSocket::bindRaw(int* devId) {
   struct sockaddr_hci a;
 
   memset(&a, 0, sizeof(a));
@@ -146,26 +146,30 @@ void BluetoothHciSocket::bindRaw() {
   a.hci_dev = 0; // default
   a.hci_channel = HCI_CHANNEL_RAW;
 
-  struct hci_dev_list_req *dl;
-  struct hci_dev_req *dr;
+  if (devId == NULL) {
+    struct hci_dev_list_req *dl;
+    struct hci_dev_req *dr;
 
-  dl = (hci_dev_list_req*)calloc(HCI_MAX_DEV * sizeof(*dr) + sizeof(*dl), 1);
-  dr = dl->dev_req;
+    dl = (hci_dev_list_req*)calloc(HCI_MAX_DEV * sizeof(*dr) + sizeof(*dl), 1);
+    dr = dl->dev_req;
 
-  dl->dev_num = HCI_MAX_DEV;
+    dl->dev_num = HCI_MAX_DEV;
 
-  if (ioctl(this->_socket, HCIGETDEVLIST, dl) > -1) {
-    for (int i = 0; i < dl->dev_num; i++, dr++) {
-      if (dr->dev_opt & (1 << HCI_UP)) {
-        // choose the first device that is up
-        // later on, it would be good to also HCIGETDEVINFO and check the HCI_RAW flag
-        a.hci_dev = dr->dev_id;
-        break;
+    if (ioctl(this->_socket, HCIGETDEVLIST, dl) > -1) {
+      for (int i = 0; i < dl->dev_num; i++, dr++) {
+        if (dr->dev_opt & (1 << HCI_UP)) {
+          // choose the first device that is up
+          // later on, it would be good to also HCIGETDEVINFO and check the HCI_RAW flag
+          a.hci_dev = dr->dev_id;
+          break;
+        }
       }
     }
-  }
 
-  free(dl);
+    free(dl);
+  } else {
+    a.hci_dev = *devId;
+  }
 
   this->_devId = a.hci_dev;
 
@@ -309,7 +313,19 @@ NAN_METHOD(BluetoothHciSocket::BindRaw) {
 
   BluetoothHciSocket* p = node::ObjectWrap::Unwrap<BluetoothHciSocket>(args.This());
 
-  p->bindRaw();
+  int devId = 0;
+  int* pDevId = NULL;
+
+  if (args.Length() > 0) {
+    v8::Handle<v8::Value> arg0 = args[0];
+    if (arg0->IsInt32() || arg0->IsUint32()) {
+      devId = arg0->IntegerValue();
+
+      pDevId = &devId;
+    }
+  }
+
+  p->bindRaw(pDevId);
 
   NanReturnValue (NanUndefined());
 }
