@@ -16,8 +16,10 @@
 #define HCIGETDEVLIST _IOR('H', 210, int)
 #define HCIGETDEVINFO _IOR('H', 211, int)
 
-#define HCI_CHANNEL_RAW   0
-#define HCI_CHANNEL_CONTROL 3
+#define HCI_CHANNEL_RAW   	0
+#define HCI_CHANNEL_USER	1
+#define HCI_CHANNEL_MONITOR	2
+#define HCI_CHANNEL_CONTROL 	3
 
 #define HCI_DEV_NONE  0xffff
 
@@ -105,6 +107,7 @@ void BluetoothHciSocket::Init(v8::Handle<v8::Object> target) {
   NODE_SET_PROTOTYPE_METHOD(NanNew(s_ct), "start", BluetoothHciSocket::Start);
   NODE_SET_PROTOTYPE_METHOD(NanNew(s_ct), "bindRaw", BluetoothHciSocket::BindRaw);
   NODE_SET_PROTOTYPE_METHOD(NanNew(s_ct), "bindControl", BluetoothHciSocket::BindControl);
+  NODE_SET_PROTOTYPE_METHOD(NanNew(s_ct), "bindUser", BluetoothHciSocket::BindUser);
   NODE_SET_PROTOTYPE_METHOD(NanNew(s_ct), "getAddressBytes", BluetoothHciSocket::GetAddressBytes);
   NODE_SET_PROTOTYPE_METHOD(NanNew(s_ct), "isDevUp", BluetoothHciSocket::IsDevUp);
   NODE_SET_PROTOTYPE_METHOD(NanNew(s_ct), "setFilter", BluetoothHciSocket::SetFilter);
@@ -135,7 +138,7 @@ void BluetoothHciSocket::start() {
   uv_poll_start(&this->_pollHandle, UV_READABLE, BluetoothHciSocket::PollCallback);
 }
 
-void BluetoothHciSocket::bindRaw(int* devId) {
+void BluetoothHciSocket::bindRaw() {
   struct sockaddr_hci a;
 
   memset(&a, 0, sizeof(a));
@@ -143,30 +146,26 @@ void BluetoothHciSocket::bindRaw(int* devId) {
   a.hci_dev = 0; // default
   a.hci_channel = HCI_CHANNEL_RAW;
 
-  if (devId == NULL) {
-    struct hci_dev_list_req *dl;
-    struct hci_dev_req *dr;
+  struct hci_dev_list_req *dl;
+  struct hci_dev_req *dr;
 
-    dl = (hci_dev_list_req*)calloc(HCI_MAX_DEV * sizeof(*dr) + sizeof(*dl), 1);
-    dr = dl->dev_req;
+  dl = (hci_dev_list_req*)calloc(HCI_MAX_DEV * sizeof(*dr) + sizeof(*dl), 1);
+  dr = dl->dev_req;
 
-    dl->dev_num = HCI_MAX_DEV;
+  dl->dev_num = HCI_MAX_DEV;
 
-    if (ioctl(this->_socket, HCIGETDEVLIST, dl) > -1) {
-      for (int i = 0; i < dl->dev_num; i++, dr++) {
-        if (dr->dev_opt & (1 << HCI_UP)) {
-          // choose the first device that is up
-          // later on, it would be good to also HCIGETDEVINFO and check the HCI_RAW flag
-          a.hci_dev = dr->dev_id;
-          break;
-        }
+  if (ioctl(this->_socket, HCIGETDEVLIST, dl) > -1) {
+    for (int i = 0; i < dl->dev_num; i++, dr++) {
+      if (dr->dev_opt & (1 << HCI_UP)) {
+        // choose the first device that is up
+        // later on, it would be good to also HCIGETDEVINFO and check the HCI_RAW flag
+        a.hci_dev = dr->dev_id;
+        break;
       }
     }
-
-    free(dl);
-  } else {
-    a.hci_dev = *devId;
   }
+
+  free(dl);
 
   this->_devId = a.hci_dev;
 
@@ -180,6 +179,17 @@ void BluetoothHciSocket::bindControl() {
   a.hci_family = AF_BLUETOOTH;
   a.hci_dev = HCI_DEV_NONE;
   a.hci_channel = HCI_CHANNEL_CONTROL;
+
+  bind(this->_socket, (struct sockaddr *) &a, sizeof(a));
+}
+
+void BluetoothHciSocket::bindUser() {
+  struct sockaddr_hci a;
+
+  memset(&a, 0, sizeof(a));
+  a.hci_family = AF_BLUETOOTH;
+  a.hci_dev = 0;
+  a.hci_channel = HCI_CHANNEL_USER;
 
   bind(this->_socket, (struct sockaddr *) &a, sizeof(a));
 }
@@ -299,19 +309,7 @@ NAN_METHOD(BluetoothHciSocket::BindRaw) {
 
   BluetoothHciSocket* p = node::ObjectWrap::Unwrap<BluetoothHciSocket>(args.This());
 
-  int devId = 0;
-  int* pDevId = NULL;
-
-  if (args.Length() > 0) {
-    v8::Handle<v8::Value> arg0 = args[0];
-    if (arg0->IsInt32() || arg0->IsUint32()) {
-      devId = arg0->IntegerValue();
-
-      pDevId = &devId;
-    }
-  }
-
-  p->bindRaw(pDevId);
+  p->bindRaw();
 
   NanReturnValue (NanUndefined());
 }
@@ -322,6 +320,16 @@ NAN_METHOD(BluetoothHciSocket::BindControl) {
   BluetoothHciSocket* p = node::ObjectWrap::Unwrap<BluetoothHciSocket>(args.This());
 
   p->bindControl();
+
+  NanReturnValue (NanUndefined());
+}
+
+NAN_METHOD(BluetoothHciSocket::BindUser) {
+  NanScope();
+
+  BluetoothHciSocket* p = node::ObjectWrap::Unwrap<BluetoothHciSocket>(args.This());
+
+  p->bindUser();
 
   NanReturnValue (NanUndefined());
 }
