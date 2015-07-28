@@ -195,6 +195,8 @@ void BluetoothHciSocket::bindUser() {
   a.hci_dev = 0;
   a.hci_channel = HCI_CHANNEL_USER;
 
+  this->_devId = a.hci_dev;
+
   bind(this->_socket, (struct sockaddr *) &a, sizeof(a));
 }
 
