@@ -120,3 +120,53 @@ bluetoothHciSocket.on('error', function(error) {
 ## Examples
 
 See [examples folder](https://github.com/sandeepmistry/node-bluetooth-hci-socket/blob/master/examples) for code examples.
+
+
+## Using HCI_CHANNEL_USER
+
+To gain complete and exclusive control of the HCI device, gatt uses
+HCI_CHANNEL_USER (introduced in Linux v3.14) instead of HCI_CHANNEL_RAW.
+Those who must use an older kernel may patch in these [relevant commits
+from Marcel Holtmann](http://www.spinics.net/lists/linux-bluetooth/msg37345.html):
+
+    Bluetooth: Introduce new HCI socket channel for user operation
+    Bluetooth: Introduce user channel flag for HCI devices
+    Bluetooth: Refactor raw socket filter into more readable code
+
+Note that because gatt uses HCI_CHANNEL_USER, once gatt has opened the
+device no other program may access it.
+
+Before starting a gatt program, make sure that your BLE device is down:
+
+    sudo hciconfig
+    sudo hciconfig hci0 down  # or whatever hci device you want to use
+
+If you have BlueZ 5.14+ (or aren't sure), stop the built-in
+bluetooth server, which interferes with gatt, e.g.:
+
+    sudo service bluetooth stop
+
+Because gatt programs administer network devices, they must
+either be run as root, or be granted appropriate capabilities:
+
+    sudo <executable>
+    # OR
+    sudo setcap 'cap_net_raw,cap_net_admin=eip' <executable>
+    <executable>
+
+Usage: 
+
+```javascript
+bluetoothHciSocket.start();
+// Warning: don't call setFilter !
+// Bind in HCI_CHANNEL_USER mode !
+bluetoothHciSocket.bindUser();
+```
+
+### Example using HCI_CHANNEL_USER
+
+The examples/le-user-scan-test.js provides a LE scan using the HCI_CHANNEL_USER socket.
+
+### Note on using HCI_CHANNEL_USER
+
+In HCI_CHANNEL_USER, you gain complete control of the device, bypassing the BlueZ layer. *You will need to handle all bluetooth protocols by yourself.*
