@@ -48,22 +48,6 @@ bluetoothHciSocket.bindRaw([deviceId]); // optional deviceId (integer)
 bluetoothHciSocket.bindControl();
 ```
 
-#### Address
-
-Get the device (Bluetooth/BT) address. __Note:__ must be called after ```bindRaw```.
-
-```
-var btAddress = bluetoothHciSocket.getAddress();
-```
-
-#### Address Type
-
-Get the device (Bluetooth/BT) address type. __Note:__ must be called after ```bindRaw```.
-
-```
-var btAddressType = bluetoothHciSocket.getAddressType(); // returns: 'public' or 'random'
-```
-
 #### Is Device Up
 
 Query the device state. __Note:__ must be called after ```bindRaw```.
