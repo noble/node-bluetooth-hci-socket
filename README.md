@@ -14,14 +14,14 @@ __NOTE:__ Currently only supports __Linux__ and __Windows___.
 
 This library needs raw USB access to a Bluetooth 4.0 USB adapter, as it needs to bypass the Windows Bluetooth stack.
 
-A [WinUSB](https://msdn.microsoft.com/en-ca/library/windows/hardware/ff540196(v=vs.85).aspx) driver is required. Use [Zadig tool](http://zadig.akeo.ie) to replace the driver for your adapter.
+A [WinUSB](https://msdn.microsoft.com/en-ca/library/windows/hardware/ff540196(v=vs.85).aspx) driver is required, use [Zadig tool](http://zadig.akeo.ie) to replace the driver for your adapter.
 
 __WARNING:__ This will make the adapter unavaible in Windows Bluetooth settings!
 
 #### Compatible Bluetooth 4.0 USB Adapter's
 
 | Name | USB VID | USB PID |
-----------------------------
+|:---- | :------ | :-------|
 | BCM920702 Bluetooth 4.0 | 0x0a5c | 0x21e8 |
 | CSR8510 A10 | 0x0a12 | 0x0001 |
 
@@ -132,7 +132,7 @@ bluetoothHciSocket.on('error', function(error) {
 
 See [examples folder](https://github.com/sandeepmistry/node-bluetooth-hci-socket/blob/master/examples) for code examples.
 
-## Platform Notes:
+## Platform Notes
 
 ### Linux
 
