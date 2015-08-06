@@ -190,13 +190,37 @@ void BluetoothHciSocket::bindControl() {
   bind(this->_socket, (struct sockaddr *) &a, sizeof(a));
 }
 
-void BluetoothHciSocket::bindUser() {
+void BluetoothHciSocket::bindUser(int* devId) {
   struct sockaddr_hci a;
 
   memset(&a, 0, sizeof(a));
   a.hci_family = AF_BLUETOOTH;
-  a.hci_dev = 0;
+  a.hci_dev = 0; // default
   a.hci_channel = HCI_CHANNEL_USER;
+
+  if (devId == NULL) {
+    struct hci_dev_list_req *dl;
+    struct hci_dev_req *dr;
+
+    dl = (hci_dev_list_req*)calloc(HCI_MAX_DEV * sizeof(*dr) + sizeof(*dl), 1);
+    dr = dl->dev_req;
+
+    dl->dev_num = HCI_MAX_DEV;
+
+    if (ioctl(this->_socket, HCIGETDEVLIST, dl) > -1) {
+      for (int i = 0; i < dl->dev_num; i++, dr++) {
+        if ( !(dr->dev_opt & (1 << HCI_UP))) {
+          // choose the first device that is NOT up
+          a.hci_dev = dr->dev_id;
+          break;
+        }
+      }
+    }
+
+    free(dl);
+  } else {
+    a.hci_dev = *devId;
+  }
 
   this->_devId = a.hci_dev;
 
@@ -335,7 +359,19 @@ NAN_METHOD(BluetoothHciSocket::BindUser) {
 
   BluetoothHciSocket* p = node::ObjectWrap::Unwrap<BluetoothHciSocket>(args.This());
 
-  p->bindUser();
+  int devId = 0;
+  int* pDevId = NULL;
+
+  if (args.Length() > 0) {
+    v8::Handle<v8::Value> arg0 = args[0];
+    if (arg0->IsInt32() || arg0->IsUint32()) {
+      devId = arg0->IntegerValue();
+
+      pDevId = &devId;
+    }
+  }
+
+  p->bindUser(pDevId);
 
   NanReturnValue (NanUndefined());
 }
