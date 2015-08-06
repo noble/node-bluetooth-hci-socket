@@ -1,23 +1,11 @@
-var events = require('events');
+var os = require('os');
 
-var binding = require('./build/Release/binding.node');
-var BluetoothHciSocket = binding.BluetoothHciSocket;
+var platform = os.platform();
 
-inherits(BluetoothHciSocket, events.EventEmitter);
-
-// extend prototype
-function inherits(target, source) {
-  for (var k in source.prototype) {
-    target.prototype[k] = source.prototype[k];
-  }
+if (process.env.BLUETOOTH_HCI_SOCKET_FORCE_USB || platform === 'win32') {
+  module.exports = require('./lib/usb.js');
+} else if (platform === 'linux') {
+  module.exports = require('./lib/native');
+} else {
+  throw new Error('Unsupported platform');
 }
-
-BluetoothHciSocket.prototype.getAddress = function() {
-  return this.getAddressBytes().toString('hex').match(/.{1,2}/g).reverse().join(':');
-};
-
-BluetoothHciSocket.prototype.getAddressType = function() {
-  return 'public';
-};
-
-module.exports = BluetoothHciSocket;

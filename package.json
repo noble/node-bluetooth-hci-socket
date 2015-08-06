@@ -1,10 +1,10 @@
 {
   "name": "bluetooth-hci-socket",
-  "version": "0.1.1",
+  "version": "0.3.0",
   "description": "Bluetooth HCI socket binding for Node.js",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jshint lib/*.js"
   },
   "repository": {
     "type": "git",
@@ -13,7 +13,8 @@
   "keywords": [
     "HCI",
     "Bluetooth",
-    "Linux"
+    "Linux",
+    "Windows"
   ],
   "author": "Sandeep Mistry <sandeep.mistry@gmail.com>",
   "license": "MIT",
@@ -22,9 +23,17 @@
   },
   "homepage": "https://github.com/sandeepmistry/node-bluetooth-hci-socket",
   "os": [
-    "linux"
+    "linux",
+    "win32"
   ],
   "dependencies": {
+    "debug": "^2.2.0",
     "nan": "^1.8.4"
+  },
+  "optionalDependencies": {
+    "usb": "^1.0.6"
+  },
+  "devDependencies": {
+    "jshint": "^2.8.0"
   }
 }
