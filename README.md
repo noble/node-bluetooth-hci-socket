@@ -134,7 +134,9 @@ See [examples folder](https://github.com/sandeepmistry/node-bluetooth-hci-socket
 
 ## Using HCI_CHANNEL_USER
 
-To gain complete and exclusive control of the HCI device, gatt uses
+(Thanks to the https://github.com/paypal/gatt project for this feature !)
+
+To gain complete and exclusive control of the HCI device, you may use
 HCI_CHANNEL_USER (introduced in Linux v3.14) instead of HCI_CHANNEL_RAW.
 Those who must use an older kernel may patch in these [relevant commits
 from Marcel Holtmann](http://www.spinics.net/lists/linux-bluetooth/msg37345.html):
@@ -143,10 +145,10 @@ from Marcel Holtmann](http://www.spinics.net/lists/linux-bluetooth/msg37345.html
     Bluetooth: Introduce user channel flag for HCI devices
     Bluetooth: Refactor raw socket filter into more readable code
 
-Note that because gatt uses HCI_CHANNEL_USER, once gatt has opened the
-device no other program may access it.
+Note that using HCI_CHANNEL_USER, once a socket is opened,
+no other program may access the device.
 
-Before starting a gatt program, make sure that your BLE device is down:
+Before starting a program in this mode, make sure that your BLE device is down:
 
     sudo hciconfig
     sudo hciconfig hci0 down  # or whatever hci device you want to use
@@ -156,7 +158,7 @@ bluetooth server, which interferes with gatt, e.g.:
 
     sudo service bluetooth stop
 
-Because gatt programs administer network devices, they must
+Because using this mode administer network devices, programs must
 either be run as root, or be granted appropriate capabilities:
 
     sudo <executable>
@@ -170,7 +172,7 @@ Usage:
 bluetoothHciSocket.start();
 // Warning: don't call setFilter !
 // Bind in HCI_CHANNEL_USER mode !
-bluetoothHciSocket.bindUser();
+bluetoothHciSocket.bindUser([deviceId]); // optional deviceId (integer)
 ```
 
 ### Example using HCI_CHANNEL_USER
