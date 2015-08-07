@@ -120,9 +120,9 @@ function setScanEnable(enabled, duplicates) {
   bluetoothHciSocket.write(cmd);
 }
 
-bluetoothHciSocket.start();
-setFilter();
 bluetoothHciSocket.bindRaw();
+setFilter();
+bluetoothHciSocket.start();
 
 setScanEnable(false, true);
 

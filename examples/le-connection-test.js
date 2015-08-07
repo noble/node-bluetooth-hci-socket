@@ -126,10 +126,9 @@ function setFilter() {
   bluetoothHciSocket.setFilter(filter);
 }
 
-
-bluetoothHciSocket.start();
-setFilter();
 bluetoothHciSocket.bindRaw();
+setFilter();
+bluetoothHciSocket.start();
 
 function createConnection(address, addressType) {
   var cmd = new Buffer(29);

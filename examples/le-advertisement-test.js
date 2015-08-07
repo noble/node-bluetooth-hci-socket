@@ -207,12 +207,10 @@ function setAdvertiseEnable(enabled) {
   bluetoothHciSocket.write(cmd);
 }
 
-bluetoothHciSocket.start();
-setFilter();
 bluetoothHciSocket.bindRaw();
+setFilter();
+bluetoothHciSocket.start();
 
-console.log('address = ' + bluetoothHciSocket.getAddress());
-console.log('address type = ' + bluetoothHciSocket.getAddressType());
 console.log('isDevUp = ' + bluetoothHciSocket.isDevUp());
 
 setAdvertiseEnable(false);
