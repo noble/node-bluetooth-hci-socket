@@ -148,4 +148,18 @@ Set ```BLUETOOTH_HCI_SOCKET_FORCE_USB``` environment variable:
 
 ```sh
 sudo BLUETOOTH_HCI_SOCKET_FORCE_USB=1 node <file>.js
+
+### Windows
+
+#### Force adapter USB VID and PID
+
+Set ```BLUETOOTH_HCI_SOCKET_USB_VID``` and ```BLUETOOTH_HCI_SOCKET_USB_PID```
+
+Example for USB device id: 050d:065a:
+
+```sh
+set BLUETOOTH_HCI_SOCKET_USB_VID=0x050d
+set BLUETOOTH_HCI_SOCKET_USB_PID=0x065a
+
+node <file>.js
 ```
