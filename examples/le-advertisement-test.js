@@ -155,14 +155,16 @@ function setAdvertisingParameter() {
 };
 
 function setAdvertisingData(data) {
-  var cmd = new Buffer(5 + data.length);
+  var cmd = new Buffer(36);
+
+  cmd.fill(0);
 
   // header
   cmd.writeUInt8(HCI_COMMAND_PKT, 0);
   cmd.writeUInt16LE(LE_SET_ADVERTISING_DATA_CMD, 1);
 
   // length
-  cmd.writeUInt8(1 + data.length, 3);
+  cmd.writeUInt8(32, 3);
 
   // data
   cmd.writeUInt8(data.length, 4);
@@ -173,14 +175,16 @@ function setAdvertisingData(data) {
 }
 
 function setScanResponseData(data) {
-  var cmd = new Buffer(5 + data.length);
+  var cmd = new Buffer(36);
+
+  cmd.fill(0);
 
   // header
   cmd.writeUInt8(HCI_COMMAND_PKT, 0);
   cmd.writeUInt16LE(LE_SET_SCAN_RESPONSE_DATA_CMD, 1);
 
   // length
-  cmd.writeUInt8(1 + data.length, 3);
+  cmd.writeUInt8(32, 3);
 
   // data
   cmd.writeUInt8(data.length, 4);
@@ -215,6 +219,6 @@ console.log('isDevUp = ' + bluetoothHciSocket.isDevUp());
 
 setAdvertiseEnable(false);
 setAdvertisingParameter();
-setAdvertisingData(new Buffer('0201061aff4c000215b9407f30f5f8466eaff925556b57fe6d00010002b6', 'hex'));
 setScanResponseData(new Buffer('0909657374696d6f74650e160a182eb8855fb5ddb601000200', 'hex'));
+setAdvertisingData(new Buffer('0201061aff4c000215b9407f30f5f8466eaff925556b57fe6d00010002b6', 'hex'));
 setAdvertiseEnable(true);
