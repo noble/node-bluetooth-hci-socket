@@ -154,7 +154,7 @@ sudo BLUETOOTH_HCI_SOCKET_FORCE_USB=1 node <file>.js
 
 #### Force adapter USB VID and PID
 
-Set ```BLUETOOTH_HCI_SOCKET_USB_VID``` and ```BLUETOOTH_HCI_SOCKET_USB_PID```
+Set ```BLUETOOTH_HCI_SOCKET_USB_VID``` and ```BLUETOOTH_HCI_SOCKET_USB_PID``` environment variables.
 
 Example for USB device id: 050d:065a:
 
