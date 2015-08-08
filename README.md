@@ -148,6 +148,7 @@ Set ```BLUETOOTH_HCI_SOCKET_FORCE_USB``` environment variable:
 
 ```sh
 sudo BLUETOOTH_HCI_SOCKET_FORCE_USB=1 node <file>.js
+```
 
 ### Windows
 
