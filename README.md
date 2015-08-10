@@ -6,6 +6,8 @@ __NOTE:__ Currently only supports __Linux__ and __Windows__.
 
 ## Prerequisites
 
+ * [node-gyp requirements](https://github.com/TooTallNate/node-gyp#installation)
+
 ### Linux
 
  * Bluetooth 4.0 Adapter
