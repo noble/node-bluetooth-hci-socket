@@ -152,6 +152,20 @@ Set ```BLUETOOTH_HCI_SOCKET_FORCE_USB``` environment variable:
 sudo BLUETOOTH_HCI_SOCKET_FORCE_USB=1 node <file>.js
 ```
 
+### OS X
+
+#### Disable CSR USB Driver
+
+```sh
+sudo kextunload -b com.apple.iokit.CSRBluetoothHostControllerUSBTransport
+```
+
+#### Disable Broadcom USB Driver
+
+```sh
+sudo kextunload -b com.apple.iokit.BroadcomBluetoothHostControllerUSBTransport
+```
+
 ### Windows
 
 #### Force adapter USB VID and PID
