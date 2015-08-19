@@ -13,6 +13,7 @@ public:
   static NAN_METHOD(New);
   static NAN_METHOD(BindRaw);
   static NAN_METHOD(BindControl);
+  static NAN_METHOD(BindUser);
   static NAN_METHOD(IsDevUp);
   static NAN_METHOD(SetFilter);
   static NAN_METHOD(Start);
@@ -26,6 +27,7 @@ private:
   void start();
   void bindRaw(int* devId);
   void bindControl();
+  void bindUser(int* devId);
   bool isDevUp();
   void setFilter(char* data, int length);
   void stop();
