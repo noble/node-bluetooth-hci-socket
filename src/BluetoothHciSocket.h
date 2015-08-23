@@ -8,7 +8,7 @@
 class BluetoothHciSocket : public node::ObjectWrap {
 
 public:
-  static void Init(v8::Handle<v8::Object> target);
+  static NAN_MODULE_INIT(Init);
 
   static NAN_METHOD(New);
   static NAN_METHOD(BindRaw);
@@ -40,11 +40,13 @@ private:
   static void PollCallback(uv_poll_t* handle, int status, int events);
 
 private:
-  v8::Persistent<v8::Object> This;
+  Nan::Persistent<v8::Object> This;
 
   int _socket;
   int _devId;
   uv_poll_t _pollHandle;
+
+  static Nan::Persistent<v8::FunctionTemplate> constructor_template;
 };
 
 #endif

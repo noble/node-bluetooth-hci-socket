@@ -91,31 +91,27 @@ struct hci_dev_info {
 };
 
 using namespace v8;
-using v8::FunctionTemplate;
 
-static v8::Persistent<v8::FunctionTemplate> s_ct;
+Nan::Persistent<FunctionTemplate> BluetoothHciSocket::constructor_template;
 
-void BluetoothHciSocket::Init(v8::Handle<v8::Object> target) {
-  NanScope();
+NAN_MODULE_INIT(BluetoothHciSocket::Init) {
+  Nan::HandleScope scope;
 
-  v8::Local<v8::FunctionTemplate> t = NanNew<v8::FunctionTemplate>(BluetoothHciSocket::New);
+  Local<FunctionTemplate> tmpl = Nan::New<FunctionTemplate>(New);
+  constructor_template.Reset(tmpl);
 
-  NanAssignPersistent(s_ct, t);
+  tmpl->InstanceTemplate()->SetInternalFieldCount(1);
+  tmpl->SetClassName(Nan::New("BluetoothHciSocket").ToLocalChecked());
 
-  NanNew(s_ct)->SetClassName(NanNew("BluetoothHciSocket"));
+  Nan::SetPrototypeMethod(tmpl, "start", Start);
+  Nan::SetPrototypeMethod(tmpl, "bindRaw", BindRaw);
+  Nan::SetPrototypeMethod(tmpl, "bindControl", BindControl);
+  Nan::SetPrototypeMethod(tmpl, "isDevUp", IsDevUp);
+  Nan::SetPrototypeMethod(tmpl, "setFilter", SetFilter);
+  Nan::SetPrototypeMethod(tmpl, "stop", Stop);
+  Nan::SetPrototypeMethod(tmpl, "write", Write);
 
-  NanNew(s_ct)->InstanceTemplate()->SetInternalFieldCount(1);
-
-  NODE_SET_PROTOTYPE_METHOD(NanNew(s_ct), "start", BluetoothHciSocket::Start);
-  NODE_SET_PROTOTYPE_METHOD(NanNew(s_ct), "bindRaw", BluetoothHciSocket::BindRaw);
-  NODE_SET_PROTOTYPE_METHOD(NanNew(s_ct), "bindControl", BluetoothHciSocket::BindControl);
-  NODE_SET_PROTOTYPE_METHOD(NanNew(s_ct), "isDevUp", BluetoothHciSocket::IsDevUp);
-  NODE_SET_PROTOTYPE_METHOD(NanNew(s_ct), "setFilter", BluetoothHciSocket::SetFilter);
-  NODE_SET_PROTOTYPE_METHOD(NanNew(s_ct), "stop", BluetoothHciSocket::Stop);
-
-  NODE_SET_PROTOTYPE_METHOD(NanNew(s_ct), "write", BluetoothHciSocket::Write);
-
-  target->Set(NanNew("BluetoothHciSocket"), NanNew(s_ct)->GetFunction());
+  target->Set(Nan::New("BluetoothHciSocket").ToLocalChecked(), tmpl->GetFunction());
 }
 
 BluetoothHciSocket::BluetoothHciSocket() :
@@ -187,7 +183,7 @@ void BluetoothHciSocket::bindControl() {
   bind(this->_socket, (struct sockaddr *) &a, sizeof(a));
 }
 
-bool  BluetoothHciSocket::isDevUp() {
+bool BluetoothHciSocket::isDevUp() {
   struct hci_dev_info di;
   bool isUp = false;
 
@@ -208,30 +204,20 @@ void BluetoothHciSocket::setFilter(char* data, int length) {
 }
 
 void BluetoothHciSocket::poll() {
+  Nan::HandleScope scope;
+
   int length = 0;
   char data[1024];
 
   length = read(this->_socket, data, sizeof(data));
 
   if (length > 0) {
-    Local<Object> slowBuffer = NanNewBufferHandle(data, length);
-    v8::Handle<v8::Object> globalObj = NanGetCurrentContext()->Global();
-    v8::Handle<v8::Function> bufferConstructor = v8::Local<v8::Function>::Cast(globalObj->Get(NanNew<String>("Buffer")));
-
-    v8::Handle<v8::Value> constructorArgs[3] = {
-      slowBuffer,
-      NanNew<Integer>(length),
-      NanNew<Integer>(0)
+    Local<Value> argv[2] = {
+      Nan::New("data").ToLocalChecked(),
+      Nan::CopyBuffer(data, length).ToLocalChecked()
     };
 
-    v8::Handle<v8::Value> buffer = bufferConstructor->NewInstance(3, constructorArgs);
-
-    v8::Handle<v8::Value> argv[2] = {
-      NanNew<String>("data"),
-      buffer
-    };
-
-    NanMakeCallback(NanNew<v8::Object>(this->This), NanNew("emit"), 2, argv);
+    Nan::MakeCallback(Nan::New<Object>(this->This), Nan::New("emit").ToLocalChecked(), 2, argv);
   }
 }
 
@@ -246,52 +232,54 @@ void BluetoothHciSocket::write_(char* data, int length) {
 }
 
 void BluetoothHciSocket::emitErrnoError() {
-  v8::Handle<v8::Object> globalObj = NanGetCurrentContext()->Global();
-  v8::Handle<v8::Function> errorConstructor = v8::Local<v8::Function>::Cast(globalObj->Get(NanNew<String>("Error")));
+  Nan::HandleScope scope;
 
-  v8::Handle<v8::Value> constructorArgs[1] = {
-    NanNew<String>(strerror(errno))
+  Handle<Object> globalObj = Nan::GetCurrentContext()->Global();
+  Handle<Function> errorConstructor = Local<Function>::Cast(globalObj->Get(Nan::New("Error").ToLocalChecked()));
+
+  Handle<Value> constructorArgs[1] = {
+    Nan::New(strerror(errno)).ToLocalChecked()
   };
 
-  v8::Handle<v8::Value> error = errorConstructor->NewInstance(1, constructorArgs);
+  Handle<Value> error = errorConstructor->NewInstance(1, constructorArgs);
 
-  v8::Handle<v8::Value> argv[2] = {
-    NanNew<String>("error"),
+  Local<Value> argv[2] = {
+    Nan::New("error").ToLocalChecked(),
     error
   };
 
-  NanMakeCallback(NanNew<v8::Object>(this->This), NanNew("emit"), 2, argv);
+  Nan::MakeCallback(Nan::New<Object>(this->This), Nan::New("emit").ToLocalChecked(), 2, argv);
 }
 
 NAN_METHOD(BluetoothHciSocket::New) {
-  NanScope();
+  Nan::HandleScope scope;
 
   BluetoothHciSocket* p = new BluetoothHciSocket();
-  p->Wrap(args.This());
-  NanAssignPersistent(p->This, args.This());
-  NanReturnValue(args.This());
+  p->Wrap(info.This());
+  p->This.Reset(info.This());
+  info.GetReturnValue().Set(info.This());
 }
 
 NAN_METHOD(BluetoothHciSocket::Start) {
-  NanScope();
+  Nan::HandleScope scope;
 
-  BluetoothHciSocket* p = node::ObjectWrap::Unwrap<BluetoothHciSocket>(args.This());
+  BluetoothHciSocket* p = node::ObjectWrap::Unwrap<BluetoothHciSocket>(info.This());
 
   p->start();
 
-  NanReturnValue (NanUndefined());
+  info.GetReturnValue().SetUndefined();
 }
 
 NAN_METHOD(BluetoothHciSocket::BindRaw) {
-  NanScope();
+  Nan::HandleScope scope;
 
-  BluetoothHciSocket* p = node::ObjectWrap::Unwrap<BluetoothHciSocket>(args.This());
+  BluetoothHciSocket* p = node::ObjectWrap::Unwrap<BluetoothHciSocket>(info.This());
 
   int devId = 0;
   int* pDevId = NULL;
 
-  if (args.Length() > 0) {
-    v8::Handle<v8::Value> arg0 = args[0];
+  if (info.Length() > 0) {
+    Handle<Value> arg0 = info[0];
     if (arg0->IsInt32() || arg0->IsUint32()) {
       devId = arg0->IntegerValue();
 
@@ -301,67 +289,67 @@ NAN_METHOD(BluetoothHciSocket::BindRaw) {
 
   p->bindRaw(pDevId);
 
-  NanReturnValue (NanUndefined());
+  info.GetReturnValue().SetUndefined();
 }
 
 NAN_METHOD(BluetoothHciSocket::BindControl) {
-  NanScope();
+  Nan::HandleScope scope;
 
-  BluetoothHciSocket* p = node::ObjectWrap::Unwrap<BluetoothHciSocket>(args.This());
+  BluetoothHciSocket* p = node::ObjectWrap::Unwrap<BluetoothHciSocket>(info.This());
 
   p->bindControl();
 
-  NanReturnValue (NanUndefined());
+  info.GetReturnValue().SetUndefined();
 }
 
 NAN_METHOD(BluetoothHciSocket::IsDevUp) {
-  NanScope();
+  Nan::HandleScope scope;
 
-  BluetoothHciSocket* p = node::ObjectWrap::Unwrap<BluetoothHciSocket>(args.This());
+  BluetoothHciSocket* p = node::ObjectWrap::Unwrap<BluetoothHciSocket>(info.This());
 
   bool isDevUp = p->isDevUp();
 
-  NanReturnValue (isDevUp ? NanTrue() : NanFalse());
+  info.GetReturnValue().Set(isDevUp);
 }
 
 NAN_METHOD(BluetoothHciSocket::SetFilter) {
-  NanScope();
+  Nan::HandleScope scope;
 
-  BluetoothHciSocket* p = node::ObjectWrap::Unwrap<BluetoothHciSocket>(args.This());
+  BluetoothHciSocket* p = node::ObjectWrap::Unwrap<BluetoothHciSocket>(info.This());
 
-  if (args.Length() > 0) {
-    v8::Handle<v8::Value> arg0 = args[0];
+  if (info.Length() > 0) {
+    Handle<Value> arg0 = info[0];
     if (arg0->IsObject()) {
       p->setFilter(node::Buffer::Data(arg0), node::Buffer::Length(arg0));
     }
   }
 
-  NanReturnValue (NanUndefined());
+  info.GetReturnValue().SetUndefined();
 }
 
 NAN_METHOD(BluetoothHciSocket::Stop) {
-  NanScope();
+  Nan::HandleScope scope;
 
-  BluetoothHciSocket* p = node::ObjectWrap::Unwrap<BluetoothHciSocket>(args.This());
+  BluetoothHciSocket* p = node::ObjectWrap::Unwrap<BluetoothHciSocket>(info.This());
 
   p->stop();
 
-  NanReturnValue (NanUndefined());
+  info.GetReturnValue().SetUndefined();
 }
 
 NAN_METHOD(BluetoothHciSocket::Write) {
-  NanScope();
-  BluetoothHciSocket* p = node::ObjectWrap::Unwrap<BluetoothHciSocket>(args.This());
+  Nan::HandleScope scope;
+  BluetoothHciSocket* p = node::ObjectWrap::Unwrap<BluetoothHciSocket>(info.This());
 
-  if (args.Length() > 0) {
-    v8::Handle<v8::Value> arg0 = args[0];
+  if (info.Length() > 0) {
+    Handle<Value> arg0 = info[0];
     if (arg0->IsObject()) {
 
       p->write_(node::Buffer::Data(arg0), node::Buffer::Length(arg0));
     }
   }
 
-  NanReturnValue (NanUndefined());
+  info.GetReturnValue().SetUndefined();
 }
 
 
@@ -375,11 +363,4 @@ void BluetoothHciSocket::PollCallback(uv_poll_t* handle, int status, int events)
   p->poll();
 }
 
-extern "C" {
-
-  static void init (v8::Handle<v8::Object> target) {
-    BluetoothHciSocket::Init(target);
-  }
-
-  NODE_MODULE(binding, init);
-}
+NODE_MODULE(binding, BluetoothHciSocket::Init);
