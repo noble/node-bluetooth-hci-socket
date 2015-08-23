@@ -234,14 +234,14 @@ void BluetoothHciSocket::write_(char* data, int length) {
 void BluetoothHciSocket::emitErrnoError() {
   Nan::HandleScope scope;
 
-  Handle<Object> globalObj = Nan::GetCurrentContext()->Global();
-  Handle<Function> errorConstructor = Local<Function>::Cast(globalObj->Get(Nan::New("Error").ToLocalChecked()));
+  Local<Object> globalObj = Nan::GetCurrentContext()->Global();
+  Local<Function> errorConstructor = Local<Function>::Cast(globalObj->Get(Nan::New("Error").ToLocalChecked()));
 
-  Handle<Value> constructorArgs[1] = {
+  Local<Value> constructorArgs[1] = {
     Nan::New(strerror(errno)).ToLocalChecked()
   };
 
-  Handle<Value> error = errorConstructor->NewInstance(1, constructorArgs);
+  Local<Value> error = errorConstructor->NewInstance(1, constructorArgs);
 
   Local<Value> argv[2] = {
     Nan::New("error").ToLocalChecked(),
@@ -279,7 +279,7 @@ NAN_METHOD(BluetoothHciSocket::BindRaw) {
   int* pDevId = NULL;
 
   if (info.Length() > 0) {
-    Handle<Value> arg0 = info[0];
+    Local<Value> arg0 = info[0];
     if (arg0->IsInt32() || arg0->IsUint32()) {
       devId = arg0->IntegerValue();
 
@@ -318,7 +318,7 @@ NAN_METHOD(BluetoothHciSocket::SetFilter) {
   BluetoothHciSocket* p = node::ObjectWrap::Unwrap<BluetoothHciSocket>(info.This());
 
   if (info.Length() > 0) {
-    Handle<Value> arg0 = info[0];
+    Local<Value> arg0 = info[0];
     if (arg0->IsObject()) {
       p->setFilter(node::Buffer::Data(arg0), node::Buffer::Length(arg0));
     }
@@ -342,7 +342,7 @@ NAN_METHOD(BluetoothHciSocket::Write) {
   BluetoothHciSocket* p = node::ObjectWrap::Unwrap<BluetoothHciSocket>(info.This());
 
   if (info.Length() > 0) {
-    Handle<Value> arg0 = info[0];
+    Local<Value> arg0 = info[0];
     if (arg0->IsObject()) {
 
       p->write_(node::Buffer::Data(arg0), node::Buffer::Length(arg0));
