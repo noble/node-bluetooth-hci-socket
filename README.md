@@ -12,7 +12,7 @@ __NOTE:__ Currently only supports __Linux__ and __Windows__.
 
  * Bluetooth 4.0 Adapter
 
-__Note:__ the [node-usb](https://github.com/nonolith/node-usb) dependency might fail install, this is ok, because it is an optional optional dependency.
+__Note:__ the [node-usb](https://github.com/nonolith/node-usb) dependency might fail install, this is ok, because it is an optional optional dependency. Installing ```libudev-dev``` via your Linux distribution's package manager will resolve the problem.
 
 ### Windows
 
