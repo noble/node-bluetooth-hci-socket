@@ -12,6 +12,8 @@ __NOTE:__ Currently only supports __Linux__ and __Windows__.
 
  * Bluetooth 4.0 Adapter
 
+__Note:__ the [node-usb](https://github.com/nonolith/node-usb) dependency might fail install, this is ok, because it is an optional optional dependency.
+
 ### Windows
 
 This library needs raw USB access to a Bluetooth 4.0 USB adapter, as it needs to bypass the Windows Bluetooth stack.
