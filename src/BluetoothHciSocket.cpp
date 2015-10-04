@@ -10,13 +10,14 @@
 #include "BluetoothHciSocket.h"
 
 #define BTPROTO_HCI 1
-#define SOL_HCI   0
+#define SOL_HCI     0
 #define HCI_FILTER  2
 
 #define HCIGETDEVLIST _IOR('H', 210, int)
 #define HCIGETDEVINFO _IOR('H', 211, int)
 
-#define HCI_CHANNEL_RAW   0
+#define HCI_CHANNEL_RAW     0
+#define HCI_CHANNEL_USER    1
 #define HCI_CHANNEL_CONTROL 3
 
 #define HCI_DEV_NONE  0xffff
@@ -105,6 +106,7 @@ NAN_MODULE_INIT(BluetoothHciSocket::Init) {
 
   Nan::SetPrototypeMethod(tmpl, "start", Start);
   Nan::SetPrototypeMethod(tmpl, "bindRaw", BindRaw);
+  Nan::SetPrototypeMethod(tmpl, "bindUser", BindUser);
   Nan::SetPrototypeMethod(tmpl, "bindControl", BindControl);
   Nan::SetPrototypeMethod(tmpl, "isDevUp", IsDevUp);
   Nan::SetPrototypeMethod(tmpl, "setFilter", SetFilter);
@@ -134,42 +136,34 @@ void BluetoothHciSocket::start() {
   uv_poll_start(&this->_pollHandle, UV_READABLE, BluetoothHciSocket::PollCallback);
 }
 
-void BluetoothHciSocket::bindRaw(int* devId) {
+int BluetoothHciSocket::bindRaw(int* devId) {
   struct sockaddr_hci a;
 
   memset(&a, 0, sizeof(a));
   a.hci_family = AF_BLUETOOTH;
-  a.hci_dev = 0; // default
+  a.hci_dev = this->devIdFor(devId, true);
   a.hci_channel = HCI_CHANNEL_RAW;
-
-  if (devId == NULL) {
-    struct hci_dev_list_req *dl;
-    struct hci_dev_req *dr;
-
-    dl = (hci_dev_list_req*)calloc(HCI_MAX_DEV * sizeof(*dr) + sizeof(*dl), 1);
-    dr = dl->dev_req;
-
-    dl->dev_num = HCI_MAX_DEV;
-
-    if (ioctl(this->_socket, HCIGETDEVLIST, dl) > -1) {
-      for (int i = 0; i < dl->dev_num; i++, dr++) {
-        if (dr->dev_opt & (1 << HCI_UP)) {
-          // choose the first device that is up
-          // later on, it would be good to also HCIGETDEVINFO and check the HCI_RAW flag
-          a.hci_dev = dr->dev_id;
-          break;
-        }
-      }
-    }
-
-    free(dl);
-  } else {
-    a.hci_dev = *devId;
-  }
 
   this->_devId = a.hci_dev;
 
   bind(this->_socket, (struct sockaddr *) &a, sizeof(a));
+
+  return this->_devId;
+}
+
+int BluetoothHciSocket::bindUser(int* devId) {
+  struct sockaddr_hci a;
+
+  memset(&a, 0, sizeof(a));
+  a.hci_family = AF_BLUETOOTH;
+  a.hci_dev = this->devIdFor(devId, false);
+  a.hci_channel = HCI_CHANNEL_USER;
+
+  this->_devId = a.hci_dev;
+
+  bind(this->_socket, (struct sockaddr *) &a, sizeof(a));
+
+  return this->_devId;
 }
 
 void BluetoothHciSocket::bindControl() {
@@ -251,6 +245,40 @@ void BluetoothHciSocket::emitErrnoError() {
   Nan::MakeCallback(Nan::New<Object>(this->This), Nan::New("emit").ToLocalChecked(), 2, argv);
 }
 
+int BluetoothHciSocket::devIdFor(int* pDevId, bool isUp) {
+  int devId = 0; // default
+
+  if (pDevId == NULL) {
+    struct hci_dev_list_req *dl;
+    struct hci_dev_req *dr;
+
+    dl = (hci_dev_list_req*)calloc(HCI_MAX_DEV * sizeof(*dr) + sizeof(*dl), 1);
+    dr = dl->dev_req;
+
+    dl->dev_num = HCI_MAX_DEV;
+
+    if (ioctl(this->_socket, HCIGETDEVLIST, dl) > -1) {
+      for (int i = 0; i < dl->dev_num; i++, dr++) {
+        bool devUp = dr->dev_opt & (1 << HCI_UP);
+        bool match = isUp ? devUp : !devUp;
+
+        if (match) {
+          // choose the first device that is match
+          // later on, it would be good to also HCIGETDEVINFO and check the HCI_RAW flag
+          devId = dr->dev_id;
+          break;
+        }
+      }
+    }
+
+    free(dl);
+  } else {
+    devId = *pDevId;
+  }
+
+  return devId;
+}
+
 NAN_METHOD(BluetoothHciSocket::New) {
   Nan::HandleScope scope;
 
@@ -287,9 +315,31 @@ NAN_METHOD(BluetoothHciSocket::BindRaw) {
     }
   }
 
-  p->bindRaw(pDevId);
+  devId = p->bindRaw(pDevId);
 
-  info.GetReturnValue().SetUndefined();
+  info.GetReturnValue().Set(devId);
+}
+
+NAN_METHOD(BluetoothHciSocket::BindUser) {
+  Nan::HandleScope scope;
+
+  BluetoothHciSocket* p = node::ObjectWrap::Unwrap<BluetoothHciSocket>(info.This());
+
+  int devId = 0;
+  int* pDevId = NULL;
+
+  if (info.Length() > 0) {
+    Local<Value> arg0 = info[0];
+    if (arg0->IsInt32() || arg0->IsUint32()) {
+      devId = arg0->IntegerValue();
+
+      pDevId = &devId;
+    }
+  }
+
+  devId = p->bindUser(pDevId);
+
+  info.GetReturnValue().Set(devId);
 }
 
 NAN_METHOD(BluetoothHciSocket::BindControl) {

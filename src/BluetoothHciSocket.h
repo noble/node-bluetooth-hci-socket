@@ -12,6 +12,7 @@ public:
 
   static NAN_METHOD(New);
   static NAN_METHOD(BindRaw);
+  static NAN_METHOD(BindUser);
   static NAN_METHOD(BindControl);
   static NAN_METHOD(IsDevUp);
   static NAN_METHOD(SetFilter);
@@ -24,7 +25,8 @@ private:
   ~BluetoothHciSocket();
 
   void start();
-  void bindRaw(int* devId);
+  int bindRaw(int* devId);
+  int bindUser(int* devId);
   void bindControl();
   bool isDevUp();
   void setFilter(char* data, int length);
@@ -35,6 +37,7 @@ private:
   void poll();
 
   void emitErrnoError();
+  int devIdFor(int* devId, bool isUp);
 
   static void PollCloseCallback(uv_poll_t* handle);
   static void PollCallback(uv_poll_t* handle, int status, int events);

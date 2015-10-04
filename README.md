@@ -67,6 +67,14 @@ bluetoothHciSocket.setFilter(filter);
 bluetoothHciSocket.bindRaw([deviceId]); // optional deviceId (integer)
 ```
 
+##### User Channel
+
+```javascript
+bluetoothHciSocket.bindUser([deviceId]); // optional deviceId (integer)
+```
+
+Requires the device to be in the powered down state (```sudo hciconfig hciX down```).
+
 ##### Control Channel
 
 ```javascript
