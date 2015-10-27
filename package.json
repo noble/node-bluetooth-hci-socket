@@ -31,7 +31,7 @@
     "nan": "^2.0.5"
   },
   "optionalDependencies": {
-    "usb": "^1.0.6"
+    "usb": "^1.1.0"
   },
   "devDependencies": {
     "jshint": "^2.8.0"
