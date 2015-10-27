@@ -5,6 +5,7 @@
 
 #include <nan.h>
 
+#include <map>
 class BluetoothHciSocket : public node::ObjectWrap {
 
 public:
@@ -38,6 +39,7 @@ private:
 
   void emitErrnoError();
   int devIdFor(int* devId, bool isUp);
+  void kernelDisconnectWorkArounds(int length, char* data);
 
   static void PollCloseCallback(uv_poll_t* handle);
   static void PollCallback(uv_poll_t* handle, int status, int events);
@@ -45,9 +47,11 @@ private:
 private:
   Nan::Persistent<v8::Object> This;
 
+  int _mode;
   int _socket;
   int _devId;
   uv_poll_t _pollHandle;
+  std::map<unsigned short,int> _l2sockets;
 
   static Nan::Persistent<v8::FunctionTemplate> constructor_template;
 };
