@@ -1,11 +1,12 @@
 #ifndef ___BLUETOOTH_HCI_SOCKET_H___
 #define ___BLUETOOTH_HCI_SOCKET_H___
 
+#include <map>
+
 #include <node.h>
 
 #include <nan.h>
 
-#include <map>
 class BluetoothHciSocket : public node::ObjectWrap {
 
 public:
