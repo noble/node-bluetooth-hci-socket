@@ -5,6 +5,7 @@
 
 #include <nan.h>
 
+#include <map>
 class BluetoothHciSocket : public node::ObjectWrap {
 
 public:
