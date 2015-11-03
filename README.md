@@ -27,6 +27,7 @@ __WARNING:__ This will make the adapter unavaible in Windows Bluetooth settings!
 | Name | USB VID | USB PID |
 |:---- | :------ | :-------|
 | BCM920702 Bluetooth 4.0 | 0x0a5c | 0x21e8 |
+| BCM20702A0 Bluetooth 4.0 | 0x19ff | 0x0239 |
 | CSR8510 A10 | 0x0a12 | 0x0001 |
 | Asus BT-400 | 0x0b05 | 0x17cb |
 
