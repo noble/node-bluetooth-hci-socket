@@ -4,6 +4,8 @@ var platform = os.platform();
 
 if (process.env.BLUETOOTH_HCI_SOCKET_FORCE_USB || platform === 'win32') {
   module.exports = require('./lib/usb.js');
+} else if (process.env.BLUETOOTH_HCI_SOCKET_UART) {
+  module.exports = require('./lib/uart.js');
 } else if (platform === 'linux') {
   module.exports = require('./lib/native');
 } else {
