@@ -303,7 +303,7 @@ void BluetoothHciSocket::kernelDisconnectWorkArounds(int length, char* data) {
   // HCI Event - LE Meta Event - LE Connection Complete => manually create L2CAP socket to force kernel to book keep
   // HCI Event - Disconn Complete =======================> close socket from above
 
-  if (length == 22 && data[0] == 0x04 && data[1] == 0x3e && data[2] == 0x13 && data[3] == 0x01 && data[4] == 0x00 && data[7] == 0x00) {
+  if (length == 22 && data[0] == 0x04 && data[1] == 0x3e && data[2] == 0x13 && data[3] == 0x01 && data[4] == 0x00) {
     int l2socket;
     struct sockaddr_l2 l2a;
     unsigned short l2cid;
