@@ -24,6 +24,7 @@
   "homepage": "https://github.com/sandeepmistry/node-bluetooth-hci-socket",
   "os": [
     "linux",
+    "android",
     "win32"
   ],
   "dependencies": {
