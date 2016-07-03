@@ -30,6 +30,7 @@ __WARNING:__ This will make the adapter unavailable in Windows Bluetooth setting
 | BCM20702A0 Bluetooth 4.0 | 0x19ff | 0x0239 |
 | CSR8510 A10 | 0x0a12 | 0x0001 |
 | Asus BT-400 | 0x0b05 | 0x17cb |
+| Intel Wireless Bluetooth | 0x8087 | 0x07dc |
 
 ## Install
 
