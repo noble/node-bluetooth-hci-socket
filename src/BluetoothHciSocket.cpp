@@ -150,6 +150,7 @@ void BluetoothHciSocket::start() {
 
 int BluetoothHciSocket::bindRaw(int* devId) {
   struct sockaddr_hci a;
+  struct hci_dev_info di;
 
   memset(&a, 0, sizeof(a));
   a.hci_family = AF_BLUETOOTH;
@@ -160,6 +161,22 @@ int BluetoothHciSocket::bindRaw(int* devId) {
   this->_mode = HCI_CHANNEL_RAW;
 
   bind(this->_socket, (struct sockaddr *) &a, sizeof(a));
+
+  // get the local address and address type
+  memset(&di, 0x00, sizeof(di));
+  di.dev_id = this->_devId;
+  memset(_address, 0, sizeof(_address));
+  _addressType = 0;
+
+  if (ioctl(this->_socket, HCIGETDEVINFO, (void *)&di) > -1) {
+    memcpy(_address, &di.bdaddr, sizeof(di.bdaddr));
+    _addressType = di.type;
+
+    if (_addressType == 3) {
+      // 3 is a weird type, use 1 (public) instead
+      _addressType = 1;
+    }
+  }
 
   return this->_devId;
 }
@@ -321,8 +338,9 @@ void BluetoothHciSocket::kernelDisconnectWorkArounds(int length, char* data) {
 
     memset(&l2a, 0, sizeof(l2a));
     l2a.l2_family = AF_BLUETOOTH;
-    // NOTE: currently not setting adapter address in bind - l2a.l2_bdaddr, l2a.l2_bdaddr_type
     l2a.l2_cid = l2cid;
+    memcpy(&l2a.l2_bdaddr, _address, sizeof(l2a.l2_bdaddr));
+    l2a.l2_bdaddr_type = _addressType;
     bind(l2socket, (struct sockaddr*)&l2a, sizeof(l2a));
 
     memset(&l2a, 0, sizeof(l2a));

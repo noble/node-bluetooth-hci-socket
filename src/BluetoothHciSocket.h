@@ -53,6 +53,8 @@ private:
   int _devId;
   uv_poll_t _pollHandle;
   std::map<unsigned short,int> _l2sockets;
+  uint8_t _address[6];
+  uint8_t _addressType;
 
   static Nan::Persistent<v8::FunctionTemplate> constructor_template;
 };
