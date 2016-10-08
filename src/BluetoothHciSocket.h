@@ -1,8 +1,6 @@
 #ifndef ___BLUETOOTH_HCI_SOCKET_H___
 #define ___BLUETOOTH_HCI_SOCKET_H___
 
-#include <map>
-
 #include <node.h>
 
 #include <nan.h>
@@ -41,6 +39,7 @@ private:
   void emitErrnoError();
   int devIdFor(int* devId, bool isUp);
   void kernelDisconnectWorkArounds(int length, char* data);
+  bool kernelConnectWorkArounds(char* data, int length);
 
   static void PollCloseCallback(uv_poll_t* handle);
   static void PollCallback(uv_poll_t* handle, int status, int events);
@@ -52,7 +51,6 @@ private:
   int _socket;
   int _devId;
   uv_poll_t _pollHandle;
-  std::map<unsigned short,int> _l2sockets;
   uint8_t _address[6];
   uint8_t _addressType;
 
