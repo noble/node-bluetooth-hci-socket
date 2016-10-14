@@ -1,0 +1,35 @@
+branches:
+  only:
+    - node-pre-gyp
+    - /^[0-9]/
+
+language: cpp
+
+dist: trusty
+
+env:
+  matrix:
+  - NODE_VERSION="0.12"
+  - NODE_VERSION="4"
+  - NODE_VERSION="5"
+  - NODE_VERSION="6"
+
+before_install:
+  - sudo apt-get install build-essential libudev-dev -y
+  - export NVM_DIR=~/.nvm
+  - . $HOME/.nvm/nvm.sh
+  - nvm install $NODE_VERSION
+  - node --version
+  - npm --version
+
+install:
+- export PATH=./node_modules/.bin/:$PATH
+- npm install -g node-pre-gyp-github
+
+script:
+- npm install --build-from-source --node-gyp=$(which pangyp)
+- "./node_modules/.bin/node-pre-gyp package"
+- echo $TRAVIS_TAG
+- >
+    ([[ "$TRAVIS_TAG" =~ ^[0-9] ]] &&
+    node-pre-gyp-github publish) || true
