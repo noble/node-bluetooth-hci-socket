@@ -1,6 +1,8 @@
 # node-bluetooth-hci-socket
 
-**LINUX:** [![Build Status](https://travis-ci.org/sandeepmistry/node-bluetooth-hci-socket.svg?branch=master)](https://travis-ci.org/sandeepmistry/node-bluetooth-hci-socket) &nbsp;&nbsp;&nbsp; **Windows:** [![Build status](https://ci.appveyor.com/api/projects/status/<change token>?svg=true)](https://ci.appveyor.com/project/sandeepmistry/node-bluetooth-hci-socket/branch/master)
+**Linux:** [![Build Status](https://travis-ci.org/sandeepmistry/node-bluetooth-hci-socket.svg?branch=master)](https://travis-ci.org/sandeepmistry/node-bluetooth-hci-socket)
+
+**Windows:** [![Build status](https://ci.appveyor.com/api/projects/status/5lpfgqkt6gr13bck?svg=true)](https://ci.appveyor.com/project/sandeepmistry/node-bluetooth-hci-socket/branch/master)
 
 Bluetooth HCI socket binding for Node.js
 
@@ -10,7 +12,7 @@ __NOTE:__ Currently only supports __Linux__ and __Windows__.
 
  * [node-gyp requirements](https://github.com/TooTallNate/node-gyp#installation)
 
- __NOTE:__ node-gyp is only required if the npm cannot find binary for your os version otherwise the binaries are prebuilt.
+__NOTE:__ `node-gyp` is only required if the npm cannot find binary for your OS version otherwise the binaries are prebuilt.
 
 ### Linux
 
