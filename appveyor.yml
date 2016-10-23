@@ -1,6 +1,6 @@
 branches:
   only:
-    - node-pre-gyp
+    - master
     - /^v?[0-9]/
 
 environment:
