@@ -1,9 +1,5 @@
 # node-bluetooth-hci-socket
 
-**Linux:** [![Build Status](https://travis-ci.org/sandeepmistry/node-bluetooth-hci-socket.svg?branch=master)](https://travis-ci.org/sandeepmistry/node-bluetooth-hci-socket)
-
-**Windows:** [![Build status](https://ci.appveyor.com/api/projects/status/5lpfgqkt6gr13bck?svg=true)](https://ci.appveyor.com/project/sandeepmistry/node-bluetooth-hci-socket/branch/master)
-
 Bluetooth HCI socket binding for Node.js
 
 __NOTE:__ Currently only supports __Linux__ and __Windows__.
