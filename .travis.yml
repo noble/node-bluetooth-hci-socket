@@ -8,9 +8,6 @@ language: cpp
 
 sudo: false
 
-env:
-  - CXX=g++-4.8
-
 addons:
   apt:
     sources:
@@ -24,6 +21,8 @@ addons:
     - gcc-multilib
 
 env:
+  global:
+  - CXX=g++-4.8
   matrix:
   - NODE_VERSION="0.12" ARCH="ia32"
   - NODE_VERSION="0.12" ARCH="x64"
