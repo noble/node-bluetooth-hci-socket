@@ -10,11 +10,13 @@ sudo: false
 
 addons:
   apt:
+    sources:
+    - ubuntu-toolchain-r-test
     packages:
-      - build-essential
-      - libudev-dev
-      - gcc-multilib
-      - g++-multilib
+    - libudev-dev
+    - g++-4.8
+    - g++-4.8-multilib
+    - gcc-multilib
 
 env:
   matrix:
