@@ -6,17 +6,16 @@ branches:
 
 language: cpp
 
-dist: trusty
+sudo: false
 
 addons:
   apt:
     packages:
       - build-essential
       - libudev-dev
-      - gcc-multilib
-      - g++-multilib
       - g++-4.8
       - g++-4.8-multilib
+      - gcc-multilib
 
 env:
   matrix:
