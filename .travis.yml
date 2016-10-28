@@ -8,6 +8,15 @@ language: cpp
 
 dist: trusty
 
+addons:
+  apt:
+    packages:
+      - build-essential
+      - libudev-dev
+      - libudev:i386
+      - gcc-multilib
+      - g++-multilib
+
 env:
   matrix:
   - NODE_VERSION="0.12"
@@ -16,7 +25,6 @@ env:
   - NODE_VERSION="6"
 
 before_install:
-  - sudo apt-get install build-essential libudev-dev gcc-multilib g++-multilib -y
   - export NVM_DIR=~/.nvm
   - . $HOME/.nvm/nvm.sh
   - nvm install $NODE_VERSION
@@ -28,9 +36,8 @@ install:
 - npm install -g node-pre-gyp-github
 
 script:
-- export npm_config_arch=ia32
-- npm install --build-from-source --node-gyp=$(which pangyp)
-- "./node_modules/.bin/node-pre-gyp package"
+- npm install --build-from-source --node-gyp=$(which pangyp) --arch=ia32
+- "./node_modules/.bin/node-pre-gyp --target_arch=ia32 package"
 - echo $TRAVIS_TAG
 - >
     ([[ "$TRAVIS_TAG" =~ ^[0-9] ]] &&
