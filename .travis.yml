@@ -13,10 +13,10 @@ addons:
     packages:
       - build-essential
       - libudev-dev
-      - libudev:i386
       - gcc-multilib
       - g++-multilib
       - g++-4.8
+      - g++-4.8-multilib
 
 env:
   matrix:
