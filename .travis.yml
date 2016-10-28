@@ -21,8 +21,6 @@ addons:
     - gcc-multilib
 
 env:
-  global:
-  - CXX=g++-4.8
   matrix:
   - NODE_VERSION="0.12" ARCH="ia32"
   - NODE_VERSION="0.12" ARCH="x64"
@@ -34,6 +32,7 @@ env:
   - NODE_VERSION="6" ARCH="x64"
 
 before_install:
+  - export CXX=g++-4.8
   - export NVM_DIR=~/.nvm
   - . $HOME/.nvm/nvm.sh
   - nvm install $NODE_VERSION
