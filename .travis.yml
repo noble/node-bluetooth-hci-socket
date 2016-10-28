@@ -28,8 +28,9 @@ install:
 - npm install -g node-pre-gyp-github
 
 script:
+- export npm_config_arch=ia32
 - npm install --build-from-source --node-gyp=$(which pangyp)
-- "./node_modules/.bin/node-pre-gyp --target_arch=ia32 package"
+- "./node_modules/.bin/node-pre-gyp package"
 - echo $TRAVIS_TAG
 - >
     ([[ "$TRAVIS_TAG" =~ ^[0-9] ]] &&
