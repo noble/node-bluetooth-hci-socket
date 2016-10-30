@@ -23,12 +23,16 @@ env:
   matrix:
   - NODE_VERSION="0.12" ARCH="ia32"
   - NODE_VERSION="0.12" ARCH="x64"
+  - NODE_VERSION="0.12" ARCH="arm"
   - NODE_VERSION="4" ARCH="ia32"
   - NODE_VERSION="4" ARCH="x64"
+  - NODE_VERSION="4" ARCH="arm"
   - NODE_VERSION="5" ARCH="ia32"
   - NODE_VERSION="5" ARCH="x64"
+  - NODE_VERSION="5" ARCH="arm"
   - NODE_VERSION="6" ARCH="ia32"
   - NODE_VERSION="6" ARCH="x64"
+  - NODE_VERSION="6" ARCH="arm"
 
 before_install:
   - export CXX=g++-4.8
