@@ -15,7 +15,6 @@ addons:
     packages:
     - libc6:i386
     - libstdc++6:i386
-    - libudev-dev
     - g++-4.8
     - g++-4.8-multilib
     - gcc-multilib
@@ -44,7 +43,7 @@ install:
 - npm install -g node-pre-gyp-github
 
 script:
-- npm install --build-from-source --node-gyp=$(which pangyp) --arch=$ARCH --loglevel=verbose
+- npm install --no-optional --build-from-source --node-gyp=$(which pangyp) --arch=$ARCH --loglevel=verbose
 - "./node_modules/.bin/node-pre-gyp --target_arch=$ARCH package"
 - echo $TRAVIS_TAG
 - >
