@@ -37,8 +37,8 @@ env:
 
 before_install:
   - export CXX=g++-4.8
-  - if [[ "$ARCH" =~ "arm" ]]; then
-      export CXX=arm-linux-gnueabihf-g++-4.8
+  - if [[ "$ARCH" == "arm" ]]; then
+      export CXX=arm-linux-gnueabihf-g++-4.8;
     fi
   - export NVM_DIR=~/.nvm
   - . $HOME/.nvm/nvm.sh
