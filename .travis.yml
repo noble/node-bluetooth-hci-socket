@@ -18,6 +18,7 @@ addons:
     - g++-4.8
     - g++-4.8-multilib
     - gcc-multilib
+    - g++-4.8-arm-linux-gnueabihf
 
 env:
   matrix:
@@ -36,6 +37,9 @@ env:
 
 before_install:
   - export CXX=g++-4.8
+  - if [[ "$ARCH" =~ "arm" ]]; then
+      export CXX=arm-linux-gnueabihf-g++-4.8
+    fi
   - export NVM_DIR=~/.nvm
   - . $HOME/.nvm/nvm.sh
   - nvm install $NODE_VERSION
