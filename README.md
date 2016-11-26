@@ -2,7 +2,7 @@
 
 Bluetooth HCI socket binding for Node.js
 
-__NOTE:__ Currently only supports __Linux__ and __Windows__.
+__NOTE:__ Currently only supports __Linux__, __FreeBSD__ and __Windows__.
 
 ## Prerequisites
 
@@ -166,6 +166,16 @@ Set ```BLUETOOTH_HCI_SOCKET_FORCE_USB``` environment variable:
 
 ```sh
 sudo BLUETOOTH_HCI_SOCKET_FORCE_USB=1 node <file>.js
+```
+
+### FreeBSD
+
+Disable automatic loading of the default Bluetooth stack by putting [no-ubt.conf](https://gist.github.com/myfreeweb/44f4f3e791a057bc4f3619a166a03b87) into ```/usr/local/etc/devd/no-ubt.conf``` and restarting devd (```sudo service devd restart```).
+
+Unload ```ng_ubt``` kernel module if already loaded:
+
+```sh
+sudo kldunload ng_ubt
 ```
 
 ### OS X

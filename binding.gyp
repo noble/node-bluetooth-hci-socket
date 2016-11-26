@@ -3,7 +3,7 @@
     {
       'target_name': 'binding',
       'conditions': [
-        ['OS=="linux" or OS=="android"', {
+        ['OS=="linux" or OS=="android" or OS=="freebsd"', {
           'sources': [
             'src/BluetoothHciSocket.cpp'
           ]

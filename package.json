@@ -25,6 +25,7 @@
   "os": [
     "linux",
     "android",
+    "freebsd",
     "win32"
   ],
   "dependencies": {
