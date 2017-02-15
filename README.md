@@ -66,6 +66,8 @@ var filter = new Buffer(14);
 bluetoothHciSocket.setFilter(filter);
 ```
 
+__Note:__ ```setFilter``` is not required if ```bindRaw``` is used.
+
 #### Bind
 
 ##### Raw Channel
