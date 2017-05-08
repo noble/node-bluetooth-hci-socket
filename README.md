@@ -36,6 +36,11 @@ __WARNING:__ This will make the adapter unavailable in Windows Bluetooth setting
 | Intel Wireless Bluetooth 7260 | 0x8087 | 0x07dc |
 | Intel Wireless Bluetooth 7265 | 0x8087 | 0x0a2a |
 
+#### Compatible Bluetooth 4.1 USB Adapter's
+| Name | USB VID | USB PID |
+|:---- | :------ | :-------|
+| BCM2045A0 Bluetooth 4.1 | 0x0a5c | 0x6412 |
+
 ## Install
 
 ```sh
