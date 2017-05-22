@@ -35,6 +35,7 @@ __WARNING:__ This will make the adapter unavailable in Windows Bluetooth setting
 | Asus BT-400 | 0x0b05 | 0x17cb |
 | Intel Wireless Bluetooth 7260 | 0x8087 | 0x07dc |
 | Intel Wireless Bluetooth 7265 | 0x8087 | 0x0a2a |
+| Belkin BCM20702A0 | 0x050D | 0x065A |
 
 #### Compatible Bluetooth 4.1 USB Adapter's
 | Name | USB VID | USB PID |
