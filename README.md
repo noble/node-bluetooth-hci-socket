@@ -36,6 +36,7 @@ __WARNING:__ This will make the adapter unavailable in Windows Bluetooth setting
 | Intel Wireless Bluetooth 6235 | 0x8087 | 0x07da |
 | Intel Wireless Bluetooth 7260 | 0x8087 | 0x07dc |
 | Intel Wireless Bluetooth 7265 | 0x8087 | 0x0a2a |
+| Intel Wireless Bluetooth 8265 | 0x8087 | 0x0a2b |
 | Belkin BCM20702A0 | 0x050D | 0x065A |
 
 #### Compatible Bluetooth 4.1 USB Adapter's
