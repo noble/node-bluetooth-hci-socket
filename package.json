@@ -3,9 +3,6 @@
   "version": "0.5.2",
   "description": "Bluetooth HCI socket binding for Node.js",
   "main": "index.js",
-  "scripts": {
-    "test": "jshint lib/*.js"
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/sandeepmistry/node-bluetooth-hci-socket.git"
@@ -41,7 +38,8 @@
   },
   "scripts": {
       "preinstall": "npm install node-pre-gyp",
-      "install": "node-pre-gyp install --fallback-to-build"
+      "install": "node-pre-gyp install --fallback-to-build",
+      "test": "jshint lib/*.js"
   },
   "binary": {
       "module_name": "binding",
