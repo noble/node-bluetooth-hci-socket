@@ -121,6 +121,7 @@ NAN_MODULE_INIT(BluetoothHciSocket::Init) {
   Nan::SetPrototypeMethod(tmpl, "bindUser", BindUser);
   Nan::SetPrototypeMethod(tmpl, "bindControl", BindControl);
   Nan::SetPrototypeMethod(tmpl, "isDevUp", IsDevUp);
+  Nan::SetPrototypeMethod(tmpl, "getDeviceList", GetDeviceList);
   Nan::SetPrototypeMethod(tmpl, "setFilter", SetFilter);
   Nan::SetPrototypeMethod(tmpl, "stop", Stop);
   Nan::SetPrototypeMethod(tmpl, "write", Write);
@@ -443,6 +444,44 @@ NAN_METHOD(BluetoothHciSocket::IsDevUp) {
   bool isDevUp = p->isDevUp();
 
   info.GetReturnValue().Set(isDevUp);
+}
+
+NAN_METHOD(BluetoothHciSocket::GetDeviceList) {
+  Nan::HandleScope scope;
+
+  BluetoothHciSocket* p = node::ObjectWrap::Unwrap<BluetoothHciSocket>(info.This());
+
+  struct hci_dev_list_req *dl;
+  struct hci_dev_req *dr;
+
+  dl = (hci_dev_list_req*)calloc(HCI_MAX_DEV * sizeof(*dr) + sizeof(*dl), 1);
+  dr = dl->dev_req;
+
+  dl->dev_num = HCI_MAX_DEV;
+
+  Local<Array> deviceList = Nan::New<v8::Array>();
+
+  if (ioctl(p->_socket, HCIGETDEVLIST, dl) > -1) {
+    int di = 0;
+    for (int i = 0; i < dl->dev_num; i++, dr++) {
+      uint16_t devId = dr->dev_id;
+      bool devUp = dr->dev_opt & (1 << HCI_UP);
+      if (dr != NULL) {
+        v8::Local<v8::Object> obj = Nan::New<v8::Object>();
+        obj->Set(Nan::New("devId").ToLocalChecked(), Nan::New<Number>(devId));
+        obj->Set(Nan::New("devUp").ToLocalChecked(), Nan::New<Boolean>(devUp));
+        obj->Set(Nan::New("idVendor").ToLocalChecked(), Nan::Null());
+        obj->Set(Nan::New("idProduct").ToLocalChecked(), Nan::Null());
+        obj->Set(Nan::New("busNumber").ToLocalChecked(), Nan::Null());
+        obj->Set(Nan::New("deviceAddress").ToLocalChecked(), Nan::Null());
+        Nan::Set(deviceList, di++, obj);
+      }
+    }
+  }
+
+  free(dl);
+
+  info.GetReturnValue().Set(deviceList);
 }
 
 NAN_METHOD(BluetoothHciSocket::SetFilter) {
