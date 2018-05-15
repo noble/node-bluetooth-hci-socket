@@ -1,7 +1,7 @@
 {
   'targets': [
     {
-      'target_name': 'binding',
+      'target_name': 'bluetooth_hci_socket',
       'conditions': [
         ['OS=="linux" or OS=="android" or OS=="freebsd"', {
           'sources': [

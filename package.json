@@ -42,7 +42,7 @@
       "test": "jshint lib/*.js"
   },
   "binary": {
-      "module_name": "binding",
+      "module_name": "bluetooth_hci_socket",
       "module_path": "./lib/binding/",
       "host": "https://github.com/sandeepmistry/node-bluetooth-hci-socket/releases/download/",
       "package_name": "{module_name}-{version}-{node_abi}-{platform}-{arch}.tar.gz",
