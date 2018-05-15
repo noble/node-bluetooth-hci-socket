@@ -1,6 +1,6 @@
 {
   "name": "bluetooth-hci-socket",
-  "version": "0.5.2",
+  "version": "0.5.4",
   "description": "Bluetooth HCI socket binding for Node.js",
   "main": "index.js",
   "repository": {
@@ -42,7 +42,7 @@
       "test": "jshint lib/*.js"
   },
   "binary": {
-      "module_name": "binding",
+      "module_name": "bluetooth_hci_socket",
       "module_path": "./lib/binding/",
       "host": "https://github.com/sandeepmistry/node-bluetooth-hci-socket/releases/download/",
       "package_name": "{module_name}-{version}-{node_abi}-{platform}-{arch}.tar.gz",
