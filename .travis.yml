@@ -12,6 +12,8 @@ env:
   - NODE_VERSION="4"
   - NODE_VERSION="5"
   - NODE_VERSION="6"
+  - NODE_VERSION="8"
+  - NODE_VERSION="10"
 
 before_install:
   - sudo apt-get install build-essential libudev-dev -y
