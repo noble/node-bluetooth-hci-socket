@@ -1,6 +1,6 @@
 {
   "name": "bluetooth-hci-socket",
-  "version": "0.5.2",
+  "version": "0.5.1",
   "description": "Bluetooth HCI socket binding for Node.js",
   "main": "index.js",
   "scripts": {
