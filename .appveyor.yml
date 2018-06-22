@@ -7,8 +7,6 @@ environment:
   GYP_MSVS_VERSION: 2013
 
   matrix:
-    - node_version: '4'
-    - node_version: '5'
     - node_version: '6'
     - node_version: '8'
     - node_version: '10'
