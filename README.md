@@ -33,8 +33,16 @@ __WARNING:__ This will make the adapter unavailable in Windows Bluetooth setting
 | BCM20702A0 Bluetooth 4.0 | 0x0489 | 0xe07a |
 | CSR8510 A10 | 0x0a12 | 0x0001 |
 | Asus BT-400 | 0x0b05 | 0x17cb |
+| Intel Wireless Bluetooth 6235 | 0x8087 | 0x07da |
 | Intel Wireless Bluetooth 7260 | 0x8087 | 0x07dc |
 | Intel Wireless Bluetooth 7265 | 0x8087 | 0x0a2a |
+| Intel Wireless Bluetooth 8265 | 0x8087 | 0x0a2b |
+| Belkin BCM20702A0 | 0x050D | 0x065A |
+
+#### Compatible Bluetooth 4.1 USB Adapter's
+| Name | USB VID | USB PID |
+|:---- | :------ | :-------|
+| BCM2045A0 Bluetooth 4.1 | 0x0a5c | 0x6412 |
 
 ## Install
 
