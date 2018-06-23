@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 var BluetoothHciSocket = require('../index');
 
 var bluetoothHciSocket = new BluetoothHciSocket();
@@ -150,9 +151,9 @@ function setAdvertisingParameter() {
   cmd.writeUInt8(0x07, 17);
   cmd.writeUInt8(0x00, 18);
 
-  console.log('write: ' + cmd.toString('hex'))
+  console.log('write: ' + cmd.toString('hex'));
   bluetoothHciSocket.write(cmd);
-};
+}
 
 function setAdvertisingData(data) {
   var cmd = new Buffer(36);
@@ -170,7 +171,7 @@ function setAdvertisingData(data) {
   cmd.writeUInt8(data.length, 4);
   data.copy(cmd, 5);
 
-  console.log('write: ' + cmd.toString('hex'))
+  console.log('write: ' + cmd.toString('hex'));
   bluetoothHciSocket.write(cmd);
 }
 
@@ -190,7 +191,7 @@ function setScanResponseData(data) {
   cmd.writeUInt8(data.length, 4);
   data.copy(cmd, 5);
 
-  console.log('write: ' + cmd.toString('hex'))
+  console.log('write: ' + cmd.toString('hex'));
   bluetoothHciSocket.write(cmd);
 }
 

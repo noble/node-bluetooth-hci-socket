@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 var BluetoothHciSocket = require('../index');
 
 var bluetoothHciSocket = new BluetoothHciSocket();
