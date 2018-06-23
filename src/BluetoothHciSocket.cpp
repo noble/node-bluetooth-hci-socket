@@ -535,4 +535,4 @@ void BluetoothHciSocket::PollCallback(uv_poll_t* handle, int status, int events)
   p->poll();
 }
 
-NODE_MODULE(binding, BluetoothHciSocket::Init);
+NODE_MODULE(NODE_GYP_MODULE_NAME, BluetoothHciSocket::Init);
