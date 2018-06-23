@@ -4,7 +4,7 @@ var BluetoothHciSocket = require('../index');
 var bluetoothHciSocket = new BluetoothHciSocket();
 
 bluetoothHciSocket.on('data', function(data) {
-  console.log('data:  ' + data.toString('hex'));
+  console.log(`data:  ${data.toString('hex')}`);
 
   if (data.readUInt8(0) === HCI_EVENT_PKT) {
     if (data.readUInt8(1) === EVT_CMD_COMPLETE) {
@@ -31,9 +31,9 @@ bluetoothHciSocket.on('data', function(data) {
       var disconnectionReason = data.readUInt8(6);
 
       console.log('Disconn Complete');
-      console.log('\t' + disconnectionStatus);
-      console.log('\t' + disconnectionHandle);
-      console.log('\t' + disconnectionReason);
+      console.log(`\t${disconnectionStatus}`);
+      console.log(`\t${disconnectionHandle}`);
+      console.log(`\t${disconnectionReason}`);
 
       process.exit(0);
     } else if (data.readUInt8(1) === EVT_LE_META_EVENT) {
@@ -51,15 +51,15 @@ bluetoothHciSocket.on('data', function(data) {
         var masterClockAccuracy = data.readUInt8(21);
 
         console.log('LE Connection Complete');
-        console.log('\t' + status);
-        console.log('\t' + handle);
-        console.log('\t' + role);
-        console.log('\t' + ['PUBLIC', 'RANDOM'][peerBdAddrType]);
-        console.log('\t' + peerBdAddr.toString('hex').match(/.{1,2}/g).reverse().join(':'));
-        console.log('\t' + interval * 1.25);
-        console.log('\t' + latency);
-        console.log('\t' + supervisionTimeout * 10);
-        console.log('\t' + masterClockAccuracy);
+        console.log(`\t${status}`);
+        console.log(`\t${handle}`);
+        console.log(`\t${role}`);
+        console.log(`\t${['PUBLIC', 'RANDOM'][peerBdAddrType]}`);
+        console.log(`\t${peerBdAddr.toString('hex').match(/.{1,2}/g).reverse().join(':')}`);
+        console.log(`\t${interval * 1.25}`);
+        console.log(`\t${latency}`);
+        console.log(`\t${supervisionTimeout * 10}`);
+        console.log(`\t${masterClockAccuracy}`);
 
         setAdvertiseEnable(true);
       } else if (subEvent === EVT_LE_CONN_UPDATE_COMPLETE) {
@@ -68,12 +68,12 @@ bluetoothHciSocket.on('data', function(data) {
         var updateSupervisionTimeout = data.readUInt16LE(11);
 
         console.log('LE Connection Update Complete');
-        console.log('\t' + status);
-        console.log('\t' + handle);
+        console.log(`\t${status}`);
+        console.log(`\t${handle}`);
 
-        console.log('\t' + updateInterval * 1.25);
-        console.log('\t' + updateLatency);
-        console.log('\t' + updateSupervisionTimeout * 10);
+        console.log(`\t${updateInterval * 1.25}`);
+        console.log(`\t${updateLatency}`);
+        console.log(`\t${updateSupervisionTimeout * 10}`);
       }
     }
   }
@@ -151,7 +151,7 @@ function setAdvertisingParameter() {
   cmd.writeUInt8(0x07, 17);
   cmd.writeUInt8(0x00, 18);
 
-  console.log('write: ' + cmd.toString('hex'));
+  console.log(`write: ${cmd.toString('hex')}`);
   bluetoothHciSocket.write(cmd);
 }
 
@@ -171,7 +171,7 @@ function setAdvertisingData(data) {
   cmd.writeUInt8(data.length, 4);
   data.copy(cmd, 5);
 
-  console.log('write: ' + cmd.toString('hex'));
+  console.log(`write: ${cmd.toString('hex')}`);
   bluetoothHciSocket.write(cmd);
 }
 
@@ -191,7 +191,7 @@ function setScanResponseData(data) {
   cmd.writeUInt8(data.length, 4);
   data.copy(cmd, 5);
 
-  console.log('write: ' + cmd.toString('hex'));
+  console.log(`write: ${cmd.toString('hex')}`);
   bluetoothHciSocket.write(cmd);
 }
 
@@ -208,7 +208,7 @@ function setAdvertiseEnable(enabled) {
   // data
   cmd.writeUInt8(enabled ? 0x01 : 0x00, 4); // enable: 0 -> disabled, 1 -> enabled
 
-  console.log('write: ' + cmd.toString('hex'));
+  console.log(`write: ${cmd.toString('hex')}`);
   bluetoothHciSocket.write(cmd);
 }
 
@@ -216,7 +216,7 @@ bluetoothHciSocket.bindRaw();
 setFilter();
 bluetoothHciSocket.start();
 
-console.log('isDevUp = ' + bluetoothHciSocket.isDevUp());
+console.log(`isDevUp = ${bluetoothHciSocket.isDevUp()}`);
 
 setAdvertiseEnable(false);
 setAdvertisingParameter();

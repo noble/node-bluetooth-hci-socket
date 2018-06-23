@@ -4,7 +4,7 @@ var BluetoothHciSocket = require('../index');
 var bluetoothHciSocket = new BluetoothHciSocket();
 
 bluetoothHciSocket.on('data', function(data) {
-  console.log('data: ' + data.toString('hex') + ', ' + data.length + ' bytes');
+  console.log(`data: ${data.toString('hex')}, ${data.length} bytes`);
 
   if (data.readUInt8(0) === HCI_EVENT_PKT) {
     if (data.readUInt8(1) === EVT_DISCONN_COMPLETE) {
@@ -13,9 +13,9 @@ bluetoothHciSocket.on('data', function(data) {
       var disconnectionReason = data.readUInt8(6);
 
       console.log('Disconn Complete');
-      console.log('\t' + disconnectionStatus);
-      console.log('\t' + disconnectionHandle);
-      console.log('\t' + disconnectionReason);
+      console.log(`\t${disconnectionStatus}`);
+      console.log(`\t${disconnectionHandle}`);
+      console.log(`\t${disconnectionReason}`);
 
       process.exit(0);
     } else if (data.readUInt8(1) === EVT_LE_META_EVENT) {
@@ -32,27 +32,27 @@ bluetoothHciSocket.on('data', function(data) {
         var masterClockAccuracy = data.readUInt8(21);
 
         console.log('LE Connection Complete');
-        console.log('\t' + status);
-        console.log('\t' + handle);
-        console.log('\t' + role);
-        console.log('\t' + ['PUBLIC', 'RANDOM'][peerBdAddrType]);
-        console.log('\t' + peerBdAddr.toString('hex').match(/.{1,2}/g).reverse().join(':'));
-        console.log('\t' + interval * 1.25);
-        console.log('\t' + latency);
-        console.log('\t' + supervisionTimeout * 10);
-        console.log('\t' + masterClockAccuracy);
+        console.log(`\t${status}`);
+        console.log(`\t${handle}`);
+        console.log(`\t${role}`);
+        console.log(`\t${['PUBLIC', 'RANDOM'][peerBdAddrType]}`);
+        console.log(`\t${peerBdAddr.toString('hex').match(/.{1,2}/g).reverse().join(':')}`);
+        console.log(`\t${interval * 1.25}`);
+        console.log(`\t${latency}`);
+        console.log(`\t${supervisionTimeout * 10}`);
+        console.log(`\t${masterClockAccuracy}`);
       } else if (subEvent === EVT_LE_CONN_UPDATE_COMPLETE) {
         var updateInterval = data.readUInt16LE(7);
         var updateLatency = data.readUInt16LE(9);
         var updateSupervisionTimeout = data.readUInt16LE(11);
 
         console.log('LE Connection Update Complete');
-        console.log('\t' + status);
-        console.log('\t' + handle);
+        console.log(`\t${status}`);
+        console.log(`\t${handle}`);
 
-        console.log('\t' + updateInterval * 1.25);
-        console.log('\t' + updateLatency);
-        console.log('\t' + updateSupervisionTimeout * 10);
+        console.log(`\t${updateInterval * 1.25}`);
+        console.log(`\t${updateLatency}`);
+        console.log(`\t${updateSupervisionTimeout * 10}`);
 
         writeHandle(handle, new Buffer('020001', 'hex'));
       }
@@ -65,8 +65,8 @@ bluetoothHciSocket.on('data', function(data) {
       var aclData = data.slice(9);
 
       console.log('ACL data');
-      console.log('\t' +aclHandle);
-      console.log('\t' + aclData.toString('hex'));
+      console.log(`\t${aclHandle}`);
+      console.log(`\t${aclData.toString('hex')}`);
 
       disconnectConnection(aclHandle, HCI_OE_USER_ENDED_CONNECTION);
     }

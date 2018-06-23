@@ -32,17 +32,17 @@ var MGMT_INDEX_NONE = 0xFFFF;
 var MGMT_OP_READ_VERSION = 0x0001;
 
 bluetoothHciSocket.on('data', function(data) {
-  console.log('on -> data: ' + data.toString('hex'));
+  console.log(`on -> data: ${data.toString('hex')}`);
 
   var index = data.readUInt16LE(2);
   var length = data.readUInt16LE(4);
   var opcode = data.readUInt16LE(6);
   var status = data.readUInt8(8);
 
-  console.log('\tindex = ' + index);
-  console.log('\tlength = ' + length);
-  console.log('\topcode = ' + opcode);
-  console.log('\tstatus = ' + status + ' (' + STATUS_MAPPER[status] + ')');
+  console.log(`\tindex = ${index}`);
+  console.log(`\tlength = ${length}`);
+  console.log(`\topcode = ${opcode}`);
+  console.log(`\tstatus = ${status} (${STATUS_MAPPER[status]})`);
 
   data = data.slice(9);
 
@@ -51,10 +51,10 @@ bluetoothHciSocket.on('data', function(data) {
       var version = data.readUInt8(0);
       var revision = data.readUInt16LE(1);
 
-      console.log('\t\tversion = ' + version);
-      console.log('\t\trevision = ' + revision);
+      console.log(`\t\tversion = ${version}`);
+      console.log(`\t\trevision = ${revision}`);
     } else {
-      console.log('\t\tdata = ' + data.toString('hex'));
+      console.log(`\t\tdata = ${data.toString('hex')}`);
     }
   }
 
@@ -62,7 +62,7 @@ bluetoothHciSocket.on('data', function(data) {
 });
 
 bluetoothHciSocket.on('error', function(error) {
-  console.log('on -> error: ' + error.message);
+  console.log(`on -> error: ${error.message}`);
 });
 
 function write(opcode, index, data) {
@@ -82,7 +82,7 @@ function write(opcode, index, data) {
     data.copy(pkt, 6);
   }
 
-  console.log('writing -> ' + pkt.toString('hex'));
+  console.log(`writing -> ${pkt.toString('hex')}`);
   bluetoothHciSocket.write(pkt);
 }
 

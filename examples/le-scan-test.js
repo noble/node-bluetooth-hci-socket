@@ -4,7 +4,7 @@ var BluetoothHciSocket = require('../index');
 var bluetoothHciSocket = new BluetoothHciSocket();
 
 bluetoothHciSocket.on('data', function(data) {
-  console.log('data: ' + data.toString('hex'));
+  console.log(`data: ${data.toString('hex')}`);
 
   if (data.readUInt8(0) === HCI_EVENT_PKT) {
     if (data.readUInt8(1) === EVT_CMD_COMPLETE) {
@@ -27,11 +27,11 @@ bluetoothHciSocket.on('data', function(data) {
         var rssi = data.readInt8(data.length - 1);
 
         console.log('LE Advertising Report');
-        console.log('\t' + ['ADV_IND', 'ADV_DIRECT_IND', 'ADV_SCAN_IND', 'ADV_NONCONN_IND', 'SCAN_RSP'][gapAdvType]);
-        console.log('\t' + ['PUBLIC', 'RANDOM'][gapAddrType]);
-        console.log('\t' + gapAddr.toString('hex').match(/.{1,2}/g).reverse().join(':'));
-        console.log('\t' + eir.toString('hex'));
-        console.log('\t' + rssi);
+        console.log(`\t${['ADV_IND', 'ADV_DIRECT_IND', 'ADV_SCAN_IND', 'ADV_NONCONN_IND', 'SCAN_RSP'][gapAdvType]}`);
+        console.log(`\t${['PUBLIC', 'RANDOM'][gapAddrType]}`);
+        console.log(`\t${gapAddr.toString('hex').match(/.{1,2}/g).reverse().join(':')}`);
+        console.log(`\t${eir.toString('hex')}`);
+        console.log(`\t${rssi}`);
       }
     }
   }
