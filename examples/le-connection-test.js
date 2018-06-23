@@ -109,7 +109,6 @@ var OCF_DISCONNECT = 0x0006;
 var LE_CREATE_CONN_CMD = OCF_LE_CREATE_CONN | OGF_LE_CTL << 10;
 var DISCONNECT_CMD = OCF_DISCONNECT | OGF_LINK_CTL << 10;
 
-var HCI_SUCCESS = 0;
 var HCI_OE_USER_ENDED_CONNECTION = 0x13;
 
 function setFilter() {
@@ -117,7 +116,6 @@ function setFilter() {
   var typeMask = (1 << HCI_EVENT_PKT) | (1 << HCI_ACLDATA_PKT);
   var eventMask1 = (1 << EVT_DISCONN_COMPLETE) | (1 << EVT_CMD_COMPLETE) | (1 << EVT_CMD_STATUS);
   var eventMask2 = (1 << (EVT_LE_META_EVENT - 32));
-  var opcode = 0;
 
   filter.writeUInt32LE(typeMask, 0);
   filter.writeUInt32LE(eventMask1, 4);

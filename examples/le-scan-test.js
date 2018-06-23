@@ -50,7 +50,6 @@ bluetoothHciSocket.on('error', function(error) {
 });
 
 var HCI_COMMAND_PKT = 0x01;
-var HCI_ACLDATA_PKT = 0x02;
 var HCI_EVENT_PKT = 0x04;
 
 var EVT_CMD_COMPLETE = 0x0e;

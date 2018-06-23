@@ -30,7 +30,6 @@ var STATUS_MAPPER = [
 var MGMT_INDEX_NONE = 0xFFFF;
 
 var MGMT_OP_READ_VERSION = 0x0001;
-var MGMT_OP_LOAD_LONG_TERM_KEYS = 0x0013;
 
 bluetoothHciSocket.on('data', function(data) {
   console.log('on -> data: ' + data.toString('hex'));
