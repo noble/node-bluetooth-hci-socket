@@ -1,9 +1,9 @@
 /* eslint-disable no-console */
-var BluetoothHciSocket = require('../index');
+const BluetoothHciSocket = require('../index');
 
-var bluetoothHciSocket = new BluetoothHciSocket();
+const bluetoothHciSocket = new BluetoothHciSocket();
 
-var STATUS_MAPPER = [
+const STATUS_MAPPER = [
   'success',
   'unknown command',
   'not connected',
@@ -27,17 +27,17 @@ var STATUS_MAPPER = [
   'permission denied'
 ];
 
-var MGMT_INDEX_NONE = 0xFFFF;
+const MGMT_INDEX_NONE = 0xFFFF;
 
-var MGMT_OP_READ_VERSION = 0x0001;
+const MGMT_OP_READ_VERSION = 0x0001;
 
 bluetoothHciSocket.on('data', function(data) {
   console.log(`on -> data: ${data.toString('hex')}`);
 
-  var index = data.readUInt16LE(2);
-  var length = data.readUInt16LE(4);
-  var opcode = data.readUInt16LE(6);
-  var status = data.readUInt8(8);
+  const index = data.readUInt16LE(2);
+  const length = data.readUInt16LE(4);
+  const opcode = data.readUInt16LE(6);
+  const status = data.readUInt8(8);
 
   console.log(`\tindex = ${index}`);
   console.log(`\tlength = ${length}`);
@@ -48,8 +48,8 @@ bluetoothHciSocket.on('data', function(data) {
 
   if (data.length) {
     if (opcode === MGMT_OP_READ_VERSION) {
-      var version = data.readUInt8(0);
-      var revision = data.readUInt16LE(1);
+      const version = data.readUInt8(0);
+      const revision = data.readUInt16LE(1);
 
       console.log(`\t\tversion = ${version}`);
       console.log(`\t\trevision = ${revision}`);
@@ -66,13 +66,13 @@ bluetoothHciSocket.on('error', function(error) {
 });
 
 function write(opcode, index, data) {
-  var length = 0;
+  let length = 0;
 
   if (data) {
     length += data.length;
   }
 
-  var pkt = new Buffer(6 + length);
+  const pkt = new Buffer(6 + length);
 
   pkt.writeUInt16LE(opcode, 0);
   pkt.writeUInt16LE(index, 2);

@@ -1,10 +1,10 @@
 /* eslint-disable no-console */
-var UsbBluetoothHciSocket = require('../lib/usb');
-var usbBluetoothHciSocket = new UsbBluetoothHciSocket();
-var usbDevices = usbBluetoothHciSocket.getDeviceList();
+const UsbBluetoothHciSocket = require('../lib/usb');
+const usbBluetoothHciSocket = new UsbBluetoothHciSocket();
+const usbDevices = usbBluetoothHciSocket.getDeviceList();
 console.log('usbDevices: ', usbDevices);
 
-var NativeBluetoothHciSocket = require('../lib/native');
-var nativeBluetoothHciSocket = new NativeBluetoothHciSocket();
-var nativeDevices = nativeBluetoothHciSocket.getDeviceList();
+const NativeBluetoothHciSocket = require('../lib/native');
+const nativeBluetoothHciSocket = new NativeBluetoothHciSocket();
+const nativeDevices = nativeBluetoothHciSocket.getDeviceList();
 console.log('nativeDevices: ', nativeDevices);

@@ -1,16 +1,16 @@
 /* eslint-disable no-console */
-var BluetoothHciSocket = require('../index');
+const BluetoothHciSocket = require('../index');
 
-var bluetoothHciSocket = new BluetoothHciSocket();
+const bluetoothHciSocket = new BluetoothHciSocket();
 
 bluetoothHciSocket.on('data', function(data) {
   console.log(`data: ${data.toString('hex')}, ${data.length} bytes`);
 
   if (data.readUInt8(0) === HCI_EVENT_PKT) {
     if (data.readUInt8(1) === EVT_DISCONN_COMPLETE) {
-      var disconnectionStatus = data.readUInt8(3);
-      var disconnectionHandle = data.readUInt16LE(4);
-      var disconnectionReason = data.readUInt8(6);
+      const disconnectionStatus = data.readUInt8(3);
+      const disconnectionHandle = data.readUInt16LE(4);
+      const disconnectionReason = data.readUInt8(6);
 
       console.log('Disconn Complete');
       console.log(`\t${disconnectionStatus}`);
@@ -19,17 +19,17 @@ bluetoothHciSocket.on('data', function(data) {
 
       process.exit(0);
     } else if (data.readUInt8(1) === EVT_LE_META_EVENT) {
-      var subEvent = data.readUInt8(3);
-      var status = data.readUInt8(4);
-      var handle = data.readUInt16LE(5);
+      const subEvent = data.readUInt8(3);
+      const status = data.readUInt8(4);
+      const handle = data.readUInt16LE(5);
       if (subEvent === EVT_LE_CONN_COMPLETE) { // subevent
-        var role = data.readUInt8(7);
-        var peerBdAddrType = data.readUInt8(8);
-        var peerBdAddr = data.slice(9, 15);
-        var interval = data.readUInt16LE(15);
-        var latency = data.readUInt16LE(17);
-        var supervisionTimeout = data.readUInt16LE(19);
-        var masterClockAccuracy = data.readUInt8(21);
+        const role = data.readUInt8(7);
+        const peerBdAddrType = data.readUInt8(8);
+        const peerBdAddr = data.slice(9, 15);
+        const interval = data.readUInt16LE(15);
+        const latency = data.readUInt16LE(17);
+        const supervisionTimeout = data.readUInt16LE(19);
+        const masterClockAccuracy = data.readUInt8(21);
 
         console.log('LE Connection Complete');
         console.log(`\t${status}`);
@@ -42,9 +42,9 @@ bluetoothHciSocket.on('data', function(data) {
         console.log(`\t${supervisionTimeout * 10}`);
         console.log(`\t${masterClockAccuracy}`);
       } else if (subEvent === EVT_LE_CONN_UPDATE_COMPLETE) {
-        var updateInterval = data.readUInt16LE(7);
-        var updateLatency = data.readUInt16LE(9);
-        var updateSupervisionTimeout = data.readUInt16LE(11);
+        const updateInterval = data.readUInt16LE(7);
+        const updateLatency = data.readUInt16LE(9);
+        const updateSupervisionTimeout = data.readUInt16LE(11);
 
         console.log('LE Connection Update Complete');
         console.log(`\t${status}`);
@@ -61,8 +61,8 @@ bluetoothHciSocket.on('data', function(data) {
     if ( ((data.readUInt16LE(1) >> 12) === ACL_START) &&
           (data.readUInt16LE(7) === ATT_CID) ) {
 
-      var aclHandle = data.readUInt16LE(1) & 0x0fff;
-      var aclData = data.slice(9);
+      const aclHandle = data.readUInt16LE(1) & 0x0fff;
+      const aclData = data.slice(9);
 
       console.log('ACL data');
       console.log(`\t${aclHandle}`);
@@ -83,38 +83,38 @@ bluetoothHciSocket.on('error', function(error) {
   }
 });
 
-var HCI_COMMAND_PKT = 0x01;
-var HCI_ACLDATA_PKT = 0x02;
-var HCI_EVENT_PKT = 0x04;
+const HCI_COMMAND_PKT = 0x01;
+const HCI_ACLDATA_PKT = 0x02;
+const HCI_EVENT_PKT = 0x04;
 
-var ACL_START = 0x02;
+const ACL_START = 0x02;
 
-var ATT_CID = 0x0004;
+const ATT_CID = 0x0004;
 
-var EVT_DISCONN_COMPLETE = 0x05;
-var EVT_CMD_COMPLETE = 0x0e;
-var EVT_CMD_STATUS = 0x0f;
-var EVT_LE_META_EVENT = 0x3e;
+const EVT_DISCONN_COMPLETE = 0x05;
+const EVT_CMD_COMPLETE = 0x0e;
+const EVT_CMD_STATUS = 0x0f;
+const EVT_LE_META_EVENT = 0x3e;
 
-var EVT_LE_CONN_COMPLETE = 0x01;
-var EVT_LE_CONN_UPDATE_COMPLETE = 0x03;
+const EVT_LE_CONN_COMPLETE = 0x01;
+const EVT_LE_CONN_UPDATE_COMPLETE = 0x03;
 
-var OGF_LE_CTL = 0x08;
-var OCF_LE_CREATE_CONN = 0x000d;
+const OGF_LE_CTL = 0x08;
+const OCF_LE_CREATE_CONN = 0x000d;
 
-var OGF_LINK_CTL = 0x01;
-var OCF_DISCONNECT = 0x0006;
+const OGF_LINK_CTL = 0x01;
+const OCF_DISCONNECT = 0x0006;
 
-var LE_CREATE_CONN_CMD = OCF_LE_CREATE_CONN | OGF_LE_CTL << 10;
-var DISCONNECT_CMD = OCF_DISCONNECT | OGF_LINK_CTL << 10;
+const LE_CREATE_CONN_CMD = OCF_LE_CREATE_CONN | OGF_LE_CTL << 10;
+const DISCONNECT_CMD = OCF_DISCONNECT | OGF_LINK_CTL << 10;
 
-var HCI_OE_USER_ENDED_CONNECTION = 0x13;
+const HCI_OE_USER_ENDED_CONNECTION = 0x13;
 
 function setFilter() {
-  var filter = new Buffer(14);
-  var typeMask = (1 << HCI_EVENT_PKT) | (1 << HCI_ACLDATA_PKT);
-  var eventMask1 = (1 << EVT_DISCONN_COMPLETE) | (1 << EVT_CMD_COMPLETE) | (1 << EVT_CMD_STATUS);
-  var eventMask2 = (1 << (EVT_LE_META_EVENT - 32));
+  const filter = new Buffer(14);
+  const typeMask = (1 << HCI_EVENT_PKT) | (1 << HCI_ACLDATA_PKT);
+  const eventMask1 = (1 << EVT_DISCONN_COMPLETE) | (1 << EVT_CMD_COMPLETE) | (1 << EVT_CMD_STATUS);
+  const eventMask2 = (1 << (EVT_LE_META_EVENT - 32));
 
   filter.writeUInt32LE(typeMask, 0);
   filter.writeUInt32LE(eventMask1, 4);
@@ -129,7 +129,7 @@ setFilter();
 bluetoothHciSocket.start();
 
 function createConnection(address, addressType) {
-  var cmd = new Buffer(29);
+  const cmd = new Buffer(29);
 
   // header
   cmd.writeUInt8(HCI_COMMAND_PKT, 0);
@@ -159,7 +159,7 @@ function createConnection(address, addressType) {
 }
 
 function writeHandle(handle, data) {
-  var cmd = new Buffer(9 + data.length);
+  const cmd = new Buffer(9 + data.length);
 
   // header
   cmd.writeUInt8(HCI_ACLDATA_PKT, 0);
@@ -174,7 +174,7 @@ function writeHandle(handle, data) {
 }
 
 function disconnectConnection(handle, reason) {
-  var cmd = new Buffer(7);
+  const cmd = new Buffer(7);
 
   // header
   cmd.writeUInt8(HCI_COMMAND_PKT, 0);
