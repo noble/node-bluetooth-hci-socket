@@ -9,6 +9,7 @@
   },
   "extends": "eslint:recommended",
   "rules": {
+    "eqeqeq": "error",
     "no-bitwise": "off",
     "curly": "error",
     "indent": ["error", 2],

@@ -8,7 +8,7 @@ bluetoothHciSocket.on('data', function(data) {
 
   if (data.readUInt8(0) === HCI_EVENT_PKT) {
     if (data.readUInt8(1) === EVT_CMD_COMPLETE) {
-      if (data.readUInt16LE(4) == LE_SET_ADVERTISING_PARAMETERS_CMD) {
+      if (data.readUInt16LE(4) === LE_SET_ADVERTISING_PARAMETERS_CMD) {
         if (data.readUInt8(6) === HCI_SUCCESS) {
           console.log('LE Advertising Parameters Set');
         }
