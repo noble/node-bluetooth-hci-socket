@@ -72,7 +72,7 @@ function write(opcode, index, data) {
     length += data.length;
   }
 
-  const pkt = new Buffer(6 + length);
+  const pkt = Buffer.alloc(6 + length);
 
   pkt.writeUInt16LE(opcode, 0);
   pkt.writeUInt16LE(index, 2);

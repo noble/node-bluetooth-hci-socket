@@ -9,6 +9,7 @@
   },
   "extends": "eslint:recommended",
   "rules": {
+    "no-buffer-constructor": "error",
     "eqeqeq": "error",
     "no-bitwise": "off",
     "curly": "error",
