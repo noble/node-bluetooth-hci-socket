@@ -10,6 +10,12 @@
   "extends": "eslint:recommended",
   "rules": {
     "no-buffer-constructor": "error",
+    "no-const-assign": "error",
+    "prefer-const": "error",
+    "prefer-spread": "error",
+    "prefer-template": "error",
+    "prefer-object-spread": "error",
+    "guard-for-in": "error",
     "eqeqeq": "error",
     "no-bitwise": "off",
     "curly": "error",
