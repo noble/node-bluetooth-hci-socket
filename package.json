@@ -40,7 +40,7 @@
   },
   "scripts": {
     "preinstall": "npm install node-pre-gyp",
-    "install": "node-pre-gyp install --fallback-to-build",
+    "install": "node-pre-gyp install --build-from-source",
     "test": "eslint examples/ lib/"
   },
   "binary": {
