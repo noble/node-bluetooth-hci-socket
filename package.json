@@ -28,7 +28,7 @@
   "dependencies": {
     "debug": "^3.1.0",
     "nan": "^2.10.0",
-    "node-pre-gyp": "^0.10.2",
+    "node-pre-gyp": "^0.11.0",
     "usb": "git://github.com/jrobeson/node-usb.git#fork"
   },
   "optionalDependencies": {},
