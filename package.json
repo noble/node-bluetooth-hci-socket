@@ -39,7 +39,6 @@
     "node": ">=6.14.0"
   },
   "scripts": {
-    "preinstall": "npm install node-pre-gyp",
     "install": "node-pre-gyp install --build-from-source",
     "test": "eslint examples/ lib/"
   },
