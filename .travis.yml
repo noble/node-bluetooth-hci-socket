@@ -1,5 +1,6 @@
 branches:
   only:
+    - master
     - node-pre-gyp
     - /^[0-9]/
 
