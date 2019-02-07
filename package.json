@@ -26,10 +26,10 @@
     "win32"
   ],
   "dependencies": {
-    "@types/usb": "^1.5.0",
+    "@types/usb": "^1.5.1",
     "debug": "^3.2.6",
     "nan": "^2.12.1",
-    "node-pre-gyp": "^0.11.0",
+    "node-pre-gyp": "^0.12.0",
     "usb": "git://github.com/jrobeson/node-usb.git#fork"
   },
   "optionalDependencies": {},
