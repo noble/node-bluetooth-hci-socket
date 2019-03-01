@@ -34,7 +34,7 @@
   },
   "optionalDependencies": {},
   "devDependencies": {
-    "eslint": "^5.13.0"
+    "eslint": "^5.14.1"
   },
   "engines": {
     "node": ">=6.14.0"
