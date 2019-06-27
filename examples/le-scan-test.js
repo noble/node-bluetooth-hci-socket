@@ -1,9 +1,10 @@
-var BluetoothHciSocket = require('../index');
+/* eslint-disable no-console */
+const BluetoothHciSocket = require('../index');
 
-var bluetoothHciSocket = new BluetoothHciSocket();
+const bluetoothHciSocket = new BluetoothHciSocket();
 
 bluetoothHciSocket.on('data', function(data) {
-  console.log('data: ' + data.toString('hex'));
+  console.log(`data: ${data.toString('hex')}`);
 
   if (data.readUInt8(0) === HCI_EVENT_PKT) {
     if (data.readUInt8(1) === EVT_CMD_COMPLETE) {
@@ -18,19 +19,19 @@ bluetoothHciSocket.on('data', function(data) {
       }
     } else if (data.readUInt8(1) === EVT_LE_META_EVENT) {
       if (data.readUInt8(3) === EVT_LE_ADVERTISING_REPORT) { // subevent
-        var gapAdvType = data.readUInt8(5);
-        var gapAddrType = data.readUInt8(6);
-        var gapAddr = data.slice(7, 13);
+        const gapAdvType = data.readUInt8(5);
+        const gapAddrType = data.readUInt8(6);
+        const gapAddr = data.slice(7, 13);
 
-        var eir = data.slice(14, data.length - 1);
-        var rssi = data.readInt8(data.length - 1);
+        const eir = data.slice(14, data.length - 1);
+        const rssi = data.readInt8(data.length - 1);
 
         console.log('LE Advertising Report');
-        console.log('\t' + ['ADV_IND', 'ADV_DIRECT_IND', 'ADV_SCAN_IND', 'ADV_NONCONN_IND', 'SCAN_RSP'][gapAdvType]);
-        console.log('\t' + ['PUBLIC', 'RANDOM'][gapAddrType]);
-        console.log('\t' + gapAddr.toString('hex').match(/.{1,2}/g).reverse().join(':'));
-        console.log('\t' + eir.toString('hex'));
-        console.log('\t' + rssi);
+        console.log(`\t${['ADV_IND', 'ADV_DIRECT_IND', 'ADV_SCAN_IND', 'ADV_NONCONN_IND', 'SCAN_RSP'][gapAdvType]}`);
+        console.log(`\t${['PUBLIC', 'RANDOM'][gapAddrType]}`);
+        console.log(`\t${gapAddr.toString('hex').match(/.{1,2}/g).reverse().join(':')}`);
+        console.log(`\t${eir.toString('hex')}`);
+        console.log(`\t${rssi}`);
       }
     }
   }
@@ -48,32 +49,31 @@ bluetoothHciSocket.on('error', function(error) {
   }
 });
 
-var HCI_COMMAND_PKT = 0x01;
-var HCI_ACLDATA_PKT = 0x02;
-var HCI_EVENT_PKT = 0x04;
+const HCI_COMMAND_PKT = 0x01;
+const HCI_EVENT_PKT = 0x04;
 
-var EVT_CMD_COMPLETE = 0x0e;
-var EVT_CMD_STATUS = 0x0f;
-var EVT_LE_META_EVENT = 0x3e;
+const EVT_CMD_COMPLETE = 0x0e;
+const EVT_CMD_STATUS = 0x0f;
+const EVT_LE_META_EVENT = 0x3e;
 
-var EVT_LE_ADVERTISING_REPORT = 0x02;
+const EVT_LE_ADVERTISING_REPORT = 0x02;
 
-var OGF_LE_CTL = 0x08;
-var OCF_LE_SET_SCAN_PARAMETERS = 0x000b;
-var OCF_LE_SET_SCAN_ENABLE = 0x000c;
+const OGF_LE_CTL = 0x08;
+const OCF_LE_SET_SCAN_PARAMETERS = 0x000b;
+const OCF_LE_SET_SCAN_ENABLE = 0x000c;
 
 
-var LE_SET_SCAN_PARAMETERS_CMD = OCF_LE_SET_SCAN_PARAMETERS | OGF_LE_CTL << 10;
-var LE_SET_SCAN_ENABLE_CMD = OCF_LE_SET_SCAN_ENABLE | OGF_LE_CTL << 10;
+const LE_SET_SCAN_PARAMETERS_CMD = OCF_LE_SET_SCAN_PARAMETERS | OGF_LE_CTL << 10;
+const LE_SET_SCAN_ENABLE_CMD = OCF_LE_SET_SCAN_ENABLE | OGF_LE_CTL << 10;
 
-var HCI_SUCCESS = 0;
+const HCI_SUCCESS = 0;
 
 function setFilter() {
-  var filter = new Buffer(14);
-  var typeMask = (1 << HCI_EVENT_PKT);
-  var eventMask1 = (1 << EVT_CMD_COMPLETE) | (1 << EVT_CMD_STATUS);
-  var eventMask2 = (1 << (EVT_LE_META_EVENT - 32));
-  var opcode = 0;
+  const filter = Buffer.alloc(14);
+  const typeMask = (1 << HCI_EVENT_PKT);
+  const eventMask1 = (1 << EVT_CMD_COMPLETE) | (1 << EVT_CMD_STATUS);
+  const eventMask2 = (1 << (EVT_LE_META_EVENT - 32));
+  const opcode = 0;
 
   filter.writeUInt32LE(typeMask, 0);
   filter.writeUInt32LE(eventMask1, 4);
@@ -84,7 +84,7 @@ function setFilter() {
 }
 
 function setScanParameters() {
-  var cmd = new Buffer(11);
+  const cmd = Buffer.alloc(11);
 
   // header
   cmd.writeUInt8(HCI_COMMAND_PKT, 0);
@@ -104,7 +104,7 @@ function setScanParameters() {
 }
 
 function setScanEnable(enabled, duplicates) {
-  var cmd = new Buffer(6);
+  const cmd = Buffer.alloc(6);
 
   // header
   cmd.writeUInt8(HCI_COMMAND_PKT, 0);

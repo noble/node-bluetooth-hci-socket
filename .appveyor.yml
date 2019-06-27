@@ -1,15 +1,11 @@
-branches:
-  only:
-    - master
-    - /^v?[0-9]/
-
 environment:
   GYP_MSVS_VERSION: 2013
 
   matrix:
-    - node_version: '4'
-    - node_version: '5'
     - node_version: '6'
+    - node_version: '8'
+    - node_version: '10'
+    - node_version: '12'
 
 install:
   - ps: Install-Product node $env:node_version $env:platform
