@@ -28,13 +28,13 @@
   "dependencies": {
     "@types/usb": "^1.5.1",
     "debug": "^3.2.6",
-    "nan": "^2.12.1",
-    "node-pre-gyp": "^0.12.0",
+    "nan": "^2.14.0",
+    "node-pre-gyp": "^0.13.0",
     "usb": "git://github.com/jrobeson/node-usb.git#fork"
   },
   "optionalDependencies": {},
   "devDependencies": {
-    "eslint": "^5.14.1"
+    "eslint": "^5.16.0"
   },
   "engines": {
     "node": ">=6.14.0"
