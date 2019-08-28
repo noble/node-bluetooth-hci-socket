@@ -126,7 +126,7 @@ NAN_MODULE_INIT(BluetoothHciSocket::Init) {
   Nan::SetPrototypeMethod(tmpl, "stop", Stop);
   Nan::SetPrototypeMethod(tmpl, "write", Write);
 
-  target->Set(Nan::New("BluetoothHciSocket").ToLocalChecked(), tmpl->GetFunction());
+  Nan::Set(target, Nan::New("BluetoothHciSocket").ToLocalChecked(), Nan::GetFunction(tmpl).ToLocalChecked());
 }
 
 BluetoothHciSocket::BluetoothHciSocket() :
@@ -264,16 +264,7 @@ void BluetoothHciSocket::write_(char* data, int length) {
 }
 
 void BluetoothHciSocket::emitErrnoError() {
-  Nan::HandleScope scope;
-
-  Local<Object> globalObj = Nan::GetCurrentContext()->Global();
-  Local<Function> errorConstructor = Local<Function>::Cast(globalObj->Get(Nan::New("Error").ToLocalChecked()));
-
-  Local<Value> constructorArgs[1] = {
-    Nan::New(strerror(errno)).ToLocalChecked()
-  };
-
-  Local<Value> error = Nan::NewInstance(errorConstructor, 1, constructorArgs).ToLocalChecked();
+  v8::Local<v8::Value> error = Nan::ErrnoException(errno, NULL, strerror(errno));
 
   Local<Value> argv[2] = {
     Nan::New("error").ToLocalChecked(),
@@ -393,7 +384,7 @@ NAN_METHOD(BluetoothHciSocket::BindRaw) {
   if (info.Length() > 0) {
     Local<Value> arg0 = info[0];
     if (arg0->IsInt32() || arg0->IsUint32()) {
-      devId = arg0->IntegerValue();
+      devId = Nan::To<int32_t>(arg0).FromJust();
 
       pDevId = &devId;
     }
@@ -415,7 +406,7 @@ NAN_METHOD(BluetoothHciSocket::BindUser) {
   if (info.Length() > 0) {
     Local<Value> arg0 = info[0];
     if (arg0->IsInt32() || arg0->IsUint32()) {
-      devId = arg0->IntegerValue();
+      devId = Nan::To<int32_t>(arg0).FromJust();
 
       pDevId = &devId;
     }
@@ -468,12 +459,12 @@ NAN_METHOD(BluetoothHciSocket::GetDeviceList) {
       bool devUp = dr->dev_opt & (1 << HCI_UP);
       if (dr != NULL) {
         v8::Local<v8::Object> obj = Nan::New<v8::Object>();
-        obj->Set(Nan::New("devId").ToLocalChecked(), Nan::New<Number>(devId));
-        obj->Set(Nan::New("devUp").ToLocalChecked(), Nan::New<Boolean>(devUp));
-        obj->Set(Nan::New("idVendor").ToLocalChecked(), Nan::Null());
-        obj->Set(Nan::New("idProduct").ToLocalChecked(), Nan::Null());
-        obj->Set(Nan::New("busNumber").ToLocalChecked(), Nan::Null());
-        obj->Set(Nan::New("deviceAddress").ToLocalChecked(), Nan::Null());
+        Nan::Set(obj, Nan::New("devId").ToLocalChecked(), Nan::New<Number>(devId));
+        Nan::Set(obj, Nan::New("devUp").ToLocalChecked(), Nan::New<Boolean>(devUp));
+        Nan::Set(obj, Nan::New("idVendor").ToLocalChecked(), Nan::Null());
+        Nan::Set(obj, Nan::New("idProduct").ToLocalChecked(), Nan::Null());
+        Nan::Set(obj, Nan::New("busNumber").ToLocalChecked(), Nan::Null());
+        Nan::Set(obj, Nan::New("deviceAddress").ToLocalChecked(), Nan::Null());
         Nan::Set(deviceList, di++, obj);
       }
     }
