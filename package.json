@@ -38,7 +38,7 @@
   },
   "scripts": {
     "install": "node-pre-gyp install --fallback-to-build",
-    "test": "jshint lib/*.js"
+    "test": "jshint lib/*.js && node ."
   },
   "binary": {
     "module_name": "binding",
@@ -46,5 +46,8 @@
     "host": "https://github.com/sandeepmistry/node-bluetooth-hci-socket/releases/download/",
     "package_name": "{module_name}-{version}-{node_abi}-{platform}-{arch}.tar.gz",
     "remote_path": "{version}"
+  },
+  "jshintConfig": {
+    "esversion": 6
   }
 }
