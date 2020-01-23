@@ -130,11 +130,26 @@ NAN_MODULE_INIT(BluetoothHciSocket::Init) {
 }
 
 BluetoothHciSocket::BluetoothHciSocket() :
-  node::ObjectWrap() {
+  node::ObjectWrap(),
+  _mode(0),
+  _socket(-1),
+  _devId(0),
+  _pollHandle(),
+  _address(),
+  _addressType(0)
+  {
 
-  this->_socket = socket(AF_BLUETOOTH, SOCK_RAW | SOCK_CLOEXEC, BTPROTO_HCI);
+  int fd = socket(AF_BLUETOOTH, SOCK_RAW | SOCK_CLOEXEC, BTPROTO_HCI);
+  if (fd == -1) {
+    Nan::ThrowError(Nan::ErrnoException(errno, "socket"));
+    return;
+  }
+  this->_socket = fd;
 
-  uv_poll_init(uv_default_loop(), &this->_pollHandle, this->_socket);
+  if (uv_poll_init(uv_default_loop(), &this->_pollHandle, this->_socket) < 0) {
+    Nan::ThrowError("uv_poll_init failed");
+    return;
+  }
 
   this->_pollHandle.data = this;
 }
@@ -146,7 +161,9 @@ BluetoothHciSocket::~BluetoothHciSocket() {
 }
 
 void BluetoothHciSocket::start() {
-  uv_poll_start(&this->_pollHandle, UV_READABLE, BluetoothHciSocket::PollCallback);
+  if (uv_poll_start(&this->_pollHandle, UV_READABLE, BluetoothHciSocket::PollCallback) < 0) {
+    Nan::ThrowError("uv_poll_start failed");
+  }
 }
 
 int BluetoothHciSocket::bindRaw(int* devId) {
@@ -161,7 +178,10 @@ int BluetoothHciSocket::bindRaw(int* devId) {
   this->_devId = a.hci_dev;
   this->_mode = HCI_CHANNEL_RAW;
 
-  bind(this->_socket, (struct sockaddr *) &a, sizeof(a));
+  if (bind(this->_socket, (struct sockaddr *) &a, sizeof(a)) < 0) {
+    Nan::ThrowError(Nan::ErrnoException(errno, "bind"));
+    return -1;
+  }
 
   // get the local address and address type
   memset(&di, 0x00, sizeof(di));
@@ -193,7 +213,10 @@ int BluetoothHciSocket::bindUser(int* devId) {
   this->_devId = a.hci_dev;
   this->_mode = HCI_CHANNEL_USER;
 
-  bind(this->_socket, (struct sockaddr *) &a, sizeof(a));
+  if (bind(this->_socket, (struct sockaddr *) &a, sizeof(a)) < 0) {
+    Nan::ThrowError(Nan::ErrnoException(errno, "bind"));
+    return -1;
+  }
 
   return this->_devId;
 }
@@ -208,7 +231,10 @@ void BluetoothHciSocket::bindControl() {
 
   this->_mode = HCI_CHANNEL_CONTROL;
 
-  bind(this->_socket, (struct sockaddr *) &a, sizeof(a));
+  if (bind(this->_socket, (struct sockaddr *) &a, sizeof(a)) < 0) {
+    Nan::ThrowError(Nan::ErrnoException(errno, "bind"));
+    return;
+  }
 }
 
 bool BluetoothHciSocket::isDevUp() {
@@ -241,6 +267,7 @@ void BluetoothHciSocket::poll() {
 
   if (length > 0) {
     if (this->_mode == HCI_CHANNEL_RAW) {
+      // TODO: This does not check for the retval of this function – should it?
       this->kernelDisconnectWorkArounds(length, data);
     }
 
@@ -308,7 +335,7 @@ int BluetoothHciSocket::devIdFor(int* pDevId, bool isUp) {
   return devId;
 }
 
-void BluetoothHciSocket::kernelDisconnectWorkArounds(int length, char* data) {
+int BluetoothHciSocket::kernelDisconnectWorkArounds(int length, char* data) {
   // HCI Event - LE Meta Event - LE Connection Complete => manually create L2CAP socket to force kernel to book keep
   // HCI Event - Disconn Complete =======================> close socket from above
 
@@ -327,13 +354,19 @@ void BluetoothHciSocket::kernelDisconnectWorkArounds(int length, char* data) {
 #endif
 
     l2socket = socket(PF_BLUETOOTH, SOCK_SEQPACKET, BTPROTO_L2CAP);
+    if(l2socket == -1) {
+      return -1;
+    }
 
     memset(&l2a, 0, sizeof(l2a));
     l2a.l2_family = AF_BLUETOOTH;
     l2a.l2_cid = l2cid;
     memcpy(&l2a.l2_bdaddr, _address, sizeof(l2a.l2_bdaddr));
     l2a.l2_bdaddr_type = _addressType;
-    bind(l2socket, (struct sockaddr*)&l2a, sizeof(l2a));
+    if (bind(l2socket, (struct sockaddr*)&l2a, sizeof(l2a)) < 0) {
+      close(l2socket);
+      return -2;
+    }
 
     memset(&l2a, 0, sizeof(l2a));
     l2a.l2_family = AF_BLUETOOTH;
@@ -341,7 +374,10 @@ void BluetoothHciSocket::kernelDisconnectWorkArounds(int length, char* data) {
     l2a.l2_cid = l2cid;
     l2a.l2_bdaddr_type = data[8] + 1; // BDADDR_LE_PUBLIC (0x01), BDADDR_LE_RANDOM (0x02)
 
-    connect(l2socket, (struct sockaddr *)&l2a, sizeof(l2a));
+    if (connect(l2socket, (struct sockaddr *)&l2a, sizeof(l2a)) < -1) {
+      close(l2socket);
+      return -3;
+    }
 
     this->_l2sockets[handle] = l2socket;
   } else if (length == 7 && data[0] == 0x04 && data[1] == 0x05 && data[2] == 0x04 && data[3] == 0x00) {
@@ -352,6 +388,7 @@ void BluetoothHciSocket::kernelDisconnectWorkArounds(int length, char* data) {
       this->_l2sockets.erase(handle);
     }
   }
+  return 0;
 }
 
 NAN_METHOD(BluetoothHciSocket::New) {
