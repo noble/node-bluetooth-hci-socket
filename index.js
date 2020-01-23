@@ -7,5 +7,5 @@ if (process.env.BLUETOOTH_HCI_SOCKET_FORCE_USB || platform === 'win32' || platfo
 } else if (platform === 'linux' || platform === 'android') {
   module.exports = require('./lib/native');
 } else {
-  throw new Error('Unsupported platform');
+  module.exports = require('./lib/unsupported');
 }
