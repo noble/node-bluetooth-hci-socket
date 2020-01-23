@@ -227,7 +227,7 @@ bool BluetoothHciSocket::isDevUp() {
 
 void BluetoothHciSocket::setFilter(char* data, int length) {
   if (setsockopt(this->_socket, SOL_HCI, HCI_FILTER, data, length) < 0) {
-    this->emitErrnoError();
+    this->emitErrnoError("setsockopt");
   }
 }
 
@@ -259,12 +259,12 @@ void BluetoothHciSocket::stop() {
 
 void BluetoothHciSocket::write_(char* data, int length) {
   if (write(this->_socket, data, length) < 0) {
-    this->emitErrnoError();
+    this->emitErrnoError("write");
   }
 }
 
-void BluetoothHciSocket::emitErrnoError() {
-  v8::Local<v8::Value> error = Nan::ErrnoException(errno, NULL, strerror(errno));
+void BluetoothHciSocket::emitErrnoError(const char *syscall) {
+  v8::Local<v8::Value> error = Nan::ErrnoException(errno, syscall, strerror(errno));
 
   Local<Value> argv[2] = {
     Nan::New("error").ToLocalChecked(),

@@ -39,7 +39,7 @@ private:
 
   void poll();
 
-  void emitErrnoError();
+  void emitErrnoError(const char *syscall);
   int devIdFor(int* devId, bool isUp);
   void kernelDisconnectWorkArounds(int length, char* data);
 
