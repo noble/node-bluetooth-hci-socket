@@ -276,7 +276,13 @@ void BluetoothHciSocket::poll() {
       Nan::CopyBuffer(data, length).ToLocalChecked()
     };
 
-    Nan::MakeCallback(Nan::New<Object>(this->This), Nan::New("emit").ToLocalChecked(), 2, argv);
+    Nan::AsyncResource res("BluetoothHciSocket::poll");
+    res.runInAsyncScope(
+      Nan::New<Object>(this->This),
+      Nan::New("emit").ToLocalChecked(),
+      2,
+      argv
+    ).FromMaybe(v8::Local<v8::Value>());
   }
 }
 
@@ -297,8 +303,13 @@ void BluetoothHciSocket::emitErrnoError(const char *syscall) {
     Nan::New("error").ToLocalChecked(),
     error
   };
-
-  Nan::MakeCallback(Nan::New<Object>(this->This), Nan::New("emit").ToLocalChecked(), 2, argv);
+  Nan::AsyncResource res("BluetoothHciSocket::emitErrnoError");
+  res.runInAsyncScope(
+    Nan::New<Object>(this->This),
+    Nan::New("emit").ToLocalChecked(),
+    2,
+    argv
+  ).FromMaybe(v8::Local<v8::Value>());
 }
 
 int BluetoothHciSocket::devIdFor(const int* pDevId, bool isUp) {
