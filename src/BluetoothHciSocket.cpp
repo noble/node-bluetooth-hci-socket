@@ -167,8 +167,8 @@ void BluetoothHciSocket::start() {
 }
 
 int BluetoothHciSocket::bindRaw(int* devId) {
-  struct sockaddr_hci a;
-  struct hci_dev_info di;
+  struct sockaddr_hci a = {};
+  struct hci_dev_info di = {};
 
   memset(&a, 0, sizeof(a));
   a.hci_family = AF_BLUETOOTH;
@@ -203,7 +203,7 @@ int BluetoothHciSocket::bindRaw(int* devId) {
 }
 
 int BluetoothHciSocket::bindUser(int* devId) {
-  struct sockaddr_hci a;
+  struct sockaddr_hci a = {};
 
   memset(&a, 0, sizeof(a));
   a.hci_family = AF_BLUETOOTH;
@@ -222,7 +222,7 @@ int BluetoothHciSocket::bindUser(int* devId) {
 }
 
 void BluetoothHciSocket::bindControl() {
-  struct sockaddr_hci a;
+  struct sockaddr_hci a = {};
 
   memset(&a, 0, sizeof(a));
   a.hci_family = AF_BLUETOOTH;
@@ -238,7 +238,7 @@ void BluetoothHciSocket::bindControl() {
 }
 
 bool BluetoothHciSocket::isDevUp() {
-  struct hci_dev_info di;
+  struct hci_dev_info di = {};
   bool isUp = false;
 
   memset(&di, 0x00, sizeof(di));
@@ -301,10 +301,10 @@ void BluetoothHciSocket::emitErrnoError(const char *syscall) {
   Nan::MakeCallback(Nan::New<Object>(this->This), Nan::New("emit").ToLocalChecked(), 2, argv);
 }
 
-int BluetoothHciSocket::devIdFor(int* pDevId, bool isUp) {
+int BluetoothHciSocket::devIdFor(const int* pDevId, bool isUp) {
   int devId = 0; // default
 
-  if (pDevId == NULL) {
+  if (pDevId == nullptr) {
     struct hci_dev_list_req *dl;
     struct hci_dev_req *dr;
 
@@ -316,7 +316,7 @@ int BluetoothHciSocket::devIdFor(int* pDevId, bool isUp) {
     if (ioctl(this->_socket, HCIGETDEVLIST, dl) > -1) {
       for (int i = 0; i < dl->dev_num; i++, dr++) {
         bool devUp = dr->dev_opt & (1 << HCI_UP);
-        bool match = isUp ? devUp : !devUp;
+        bool match = (isUp == devUp);
 
         if (match) {
           // choose the first device that is match
@@ -341,7 +341,7 @@ int BluetoothHciSocket::kernelDisconnectWorkArounds(int length, char* data) {
 
   if (length == 22 && data[0] == 0x04 && data[1] == 0x3e && data[2] == 0x13 && data[3] == 0x01 && data[4] == 0x00) {
     int l2socket;
-    struct sockaddr_l2 l2a;
+    struct sockaddr_l2 l2a = {};
     unsigned short l2cid;
     unsigned short handle = *((unsigned short*)(&data[5]));
 
@@ -416,7 +416,7 @@ NAN_METHOD(BluetoothHciSocket::BindRaw) {
   BluetoothHciSocket* p = node::ObjectWrap::Unwrap<BluetoothHciSocket>(info.This());
 
   int devId = 0;
-  int* pDevId = NULL;
+  int* pDevId = nullptr;
 
   if (info.Length() > 0) {
     Local<Value> arg0 = info[0];
@@ -438,7 +438,7 @@ NAN_METHOD(BluetoothHciSocket::BindUser) {
   BluetoothHciSocket* p = node::ObjectWrap::Unwrap<BluetoothHciSocket>(info.This());
 
   int devId = 0;
-  int* pDevId = NULL;
+  int* pDevId = nullptr;
 
   if (info.Length() > 0) {
     Local<Value> arg0 = info[0];
@@ -494,7 +494,8 @@ NAN_METHOD(BluetoothHciSocket::GetDeviceList) {
     for (int i = 0; i < dl->dev_num; i++, dr++) {
       uint16_t devId = dr->dev_id;
       bool devUp = dr->dev_opt & (1 << HCI_UP);
-      if (dr != NULL) {
+      // TODO: smells like there's a bug here (but dr isn't read so...)
+      if (dr != nullptr) {
         v8::Local<v8::Object> obj = Nan::New<v8::Object>();
         Nan::Set(obj, Nan::New("devId").ToLocalChecked(), Nan::New<Number>(devId));
         Nan::Set(obj, Nan::New("devUp").ToLocalChecked(), Nan::New<Boolean>(devUp));

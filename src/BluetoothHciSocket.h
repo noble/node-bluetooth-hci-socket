@@ -40,7 +40,7 @@ private:
   void poll();
 
   void emitErrnoError(const char *syscall);
-  int devIdFor(int* devId, bool isUp);
+  int devIdFor(const int* devId, bool isUp);
   int kernelDisconnectWorkArounds(int length, char* data);
 
   static void PollCloseCallback(uv_poll_t* handle);
