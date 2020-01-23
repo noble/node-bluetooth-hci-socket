@@ -28,8 +28,10 @@ jobs:
         run: |
           sudo apt -qq update
           sudo apt install -y libudev-dev
-      - name: Test build
+      - name: Build
         run: |
           export PATH=./node_modules/.bin:${PATH}
           npm install --build-from-source --node-gyp=$(which pangyp)
           ./node_modules/.bin/node-pre-gyp package
+      - name: Test
+        run: npm test

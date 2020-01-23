@@ -38,7 +38,7 @@
   },
   "scripts": {
     "install": "node-pre-gyp install --fallback-to-build",
-    "test": "jshint lib/*.js && node ."
+    "test": "jshint lib/*.js && node test.js"
   },
   "binary": {
     "module_name": "binding",
