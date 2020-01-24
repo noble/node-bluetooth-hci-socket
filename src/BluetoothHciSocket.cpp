@@ -126,15 +126,30 @@ NAN_MODULE_INIT(BluetoothHciSocket::Init) {
   Nan::SetPrototypeMethod(tmpl, "stop", Stop);
   Nan::SetPrototypeMethod(tmpl, "write", Write);
 
-  target->Set(Nan::New("BluetoothHciSocket").ToLocalChecked(), tmpl->GetFunction());
+  Nan::Set(target, Nan::New("BluetoothHciSocket").ToLocalChecked(), Nan::GetFunction(tmpl).ToLocalChecked());
 }
 
 BluetoothHciSocket::BluetoothHciSocket() :
-  node::ObjectWrap() {
+  node::ObjectWrap(),
+  _mode(0),
+  _socket(-1),
+  _devId(0),
+  _pollHandle(),
+  _address(),
+  _addressType(0)
+  {
 
-  this->_socket = socket(AF_BLUETOOTH, SOCK_RAW | SOCK_CLOEXEC, BTPROTO_HCI);
+  int fd = socket(AF_BLUETOOTH, SOCK_RAW | SOCK_CLOEXEC, BTPROTO_HCI);
+  if (fd == -1) {
+    Nan::ThrowError(Nan::ErrnoException(errno, "socket"));
+    return;
+  }
+  this->_socket = fd;
 
-  uv_poll_init(uv_default_loop(), &this->_pollHandle, this->_socket);
+  if (uv_poll_init(uv_default_loop(), &this->_pollHandle, this->_socket) < 0) {
+    Nan::ThrowError("uv_poll_init failed");
+    return;
+  }
 
   this->_pollHandle.data = this;
 }
@@ -146,12 +161,14 @@ BluetoothHciSocket::~BluetoothHciSocket() {
 }
 
 void BluetoothHciSocket::start() {
-  uv_poll_start(&this->_pollHandle, UV_READABLE, BluetoothHciSocket::PollCallback);
+  if (uv_poll_start(&this->_pollHandle, UV_READABLE, BluetoothHciSocket::PollCallback) < 0) {
+    Nan::ThrowError("uv_poll_start failed");
+  }
 }
 
 int BluetoothHciSocket::bindRaw(int* devId) {
-  struct sockaddr_hci a;
-  struct hci_dev_info di;
+  struct sockaddr_hci a = {};
+  struct hci_dev_info di = {};
 
   memset(&a, 0, sizeof(a));
   a.hci_family = AF_BLUETOOTH;
@@ -161,7 +178,10 @@ int BluetoothHciSocket::bindRaw(int* devId) {
   this->_devId = a.hci_dev;
   this->_mode = HCI_CHANNEL_RAW;
 
-  bind(this->_socket, (struct sockaddr *) &a, sizeof(a));
+  if (bind(this->_socket, (struct sockaddr *) &a, sizeof(a)) < 0) {
+    Nan::ThrowError(Nan::ErrnoException(errno, "bind"));
+    return -1;
+  }
 
   // get the local address and address type
   memset(&di, 0x00, sizeof(di));
@@ -183,7 +203,7 @@ int BluetoothHciSocket::bindRaw(int* devId) {
 }
 
 int BluetoothHciSocket::bindUser(int* devId) {
-  struct sockaddr_hci a;
+  struct sockaddr_hci a = {};
 
   memset(&a, 0, sizeof(a));
   a.hci_family = AF_BLUETOOTH;
@@ -193,13 +213,16 @@ int BluetoothHciSocket::bindUser(int* devId) {
   this->_devId = a.hci_dev;
   this->_mode = HCI_CHANNEL_USER;
 
-  bind(this->_socket, (struct sockaddr *) &a, sizeof(a));
+  if (bind(this->_socket, (struct sockaddr *) &a, sizeof(a)) < 0) {
+    Nan::ThrowError(Nan::ErrnoException(errno, "bind"));
+    return -1;
+  }
 
   return this->_devId;
 }
 
 void BluetoothHciSocket::bindControl() {
-  struct sockaddr_hci a;
+  struct sockaddr_hci a = {};
 
   memset(&a, 0, sizeof(a));
   a.hci_family = AF_BLUETOOTH;
@@ -208,11 +231,14 @@ void BluetoothHciSocket::bindControl() {
 
   this->_mode = HCI_CHANNEL_CONTROL;
 
-  bind(this->_socket, (struct sockaddr *) &a, sizeof(a));
+  if (bind(this->_socket, (struct sockaddr *) &a, sizeof(a)) < 0) {
+    Nan::ThrowError(Nan::ErrnoException(errno, "bind"));
+    return;
+  }
 }
 
 bool BluetoothHciSocket::isDevUp() {
-  struct hci_dev_info di;
+  struct hci_dev_info di = {};
   bool isUp = false;
 
   memset(&di, 0x00, sizeof(di));
@@ -227,7 +253,7 @@ bool BluetoothHciSocket::isDevUp() {
 
 void BluetoothHciSocket::setFilter(char* data, int length) {
   if (setsockopt(this->_socket, SOL_HCI, HCI_FILTER, data, length) < 0) {
-    this->emitErrnoError();
+    this->emitErrnoError("setsockopt");
   }
 }
 
@@ -241,6 +267,7 @@ void BluetoothHciSocket::poll() {
 
   if (length > 0) {
     if (this->_mode == HCI_CHANNEL_RAW) {
+      // TODO: This does not check for the retval of this function – should it?
       this->kernelDisconnectWorkArounds(length, data);
     }
 
@@ -249,7 +276,13 @@ void BluetoothHciSocket::poll() {
       Nan::CopyBuffer(data, length).ToLocalChecked()
     };
 
-    Nan::MakeCallback(Nan::New<Object>(this->This), Nan::New("emit").ToLocalChecked(), 2, argv);
+    Nan::AsyncResource res("BluetoothHciSocket::poll");
+    res.runInAsyncScope(
+      Nan::New<Object>(this->This),
+      Nan::New("emit").ToLocalChecked(),
+      2,
+      argv
+    ).FromMaybe(v8::Local<v8::Value>());
   }
 }
 
@@ -259,34 +292,30 @@ void BluetoothHciSocket::stop() {
 
 void BluetoothHciSocket::write_(char* data, int length) {
   if (write(this->_socket, data, length) < 0) {
-    this->emitErrnoError();
+    this->emitErrnoError("write");
   }
 }
 
-void BluetoothHciSocket::emitErrnoError() {
-  Nan::HandleScope scope;
-
-  Local<Object> globalObj = Nan::GetCurrentContext()->Global();
-  Local<Function> errorConstructor = Local<Function>::Cast(globalObj->Get(Nan::New("Error").ToLocalChecked()));
-
-  Local<Value> constructorArgs[1] = {
-    Nan::New(strerror(errno)).ToLocalChecked()
-  };
-
-  Local<Value> error = errorConstructor->NewInstance(1, constructorArgs);
+void BluetoothHciSocket::emitErrnoError(const char *syscall) {
+  v8::Local<v8::Value> error = Nan::ErrnoException(errno, syscall, strerror(errno));
 
   Local<Value> argv[2] = {
     Nan::New("error").ToLocalChecked(),
     error
   };
-
-  Nan::MakeCallback(Nan::New<Object>(this->This), Nan::New("emit").ToLocalChecked(), 2, argv);
+  Nan::AsyncResource res("BluetoothHciSocket::emitErrnoError");
+  res.runInAsyncScope(
+    Nan::New<Object>(this->This),
+    Nan::New("emit").ToLocalChecked(),
+    2,
+    argv
+  ).FromMaybe(v8::Local<v8::Value>());
 }
 
-int BluetoothHciSocket::devIdFor(int* pDevId, bool isUp) {
+int BluetoothHciSocket::devIdFor(const int* pDevId, bool isUp) {
   int devId = 0; // default
 
-  if (pDevId == NULL) {
+  if (pDevId == nullptr) {
     struct hci_dev_list_req *dl;
     struct hci_dev_req *dr;
 
@@ -298,7 +327,7 @@ int BluetoothHciSocket::devIdFor(int* pDevId, bool isUp) {
     if (ioctl(this->_socket, HCIGETDEVLIST, dl) > -1) {
       for (int i = 0; i < dl->dev_num; i++, dr++) {
         bool devUp = dr->dev_opt & (1 << HCI_UP);
-        bool match = isUp ? devUp : !devUp;
+        bool match = (isUp == devUp);
 
         if (match) {
           // choose the first device that is match
@@ -317,13 +346,13 @@ int BluetoothHciSocket::devIdFor(int* pDevId, bool isUp) {
   return devId;
 }
 
-void BluetoothHciSocket::kernelDisconnectWorkArounds(int length, char* data) {
+int BluetoothHciSocket::kernelDisconnectWorkArounds(int length, char* data) {
   // HCI Event - LE Meta Event - LE Connection Complete => manually create L2CAP socket to force kernel to book keep
   // HCI Event - Disconn Complete =======================> close socket from above
 
   if (length == 22 && data[0] == 0x04 && data[1] == 0x3e && data[2] == 0x13 && data[3] == 0x01 && data[4] == 0x00) {
     int l2socket;
-    struct sockaddr_l2 l2a;
+    struct sockaddr_l2 l2a = {};
     unsigned short l2cid;
     unsigned short handle = *((unsigned short*)(&data[5]));
 
@@ -336,13 +365,19 @@ void BluetoothHciSocket::kernelDisconnectWorkArounds(int length, char* data) {
 #endif
 
     l2socket = socket(PF_BLUETOOTH, SOCK_SEQPACKET, BTPROTO_L2CAP);
+    if(l2socket == -1) {
+      return -1;
+    }
 
     memset(&l2a, 0, sizeof(l2a));
     l2a.l2_family = AF_BLUETOOTH;
     l2a.l2_cid = l2cid;
     memcpy(&l2a.l2_bdaddr, _address, sizeof(l2a.l2_bdaddr));
     l2a.l2_bdaddr_type = _addressType;
-    bind(l2socket, (struct sockaddr*)&l2a, sizeof(l2a));
+    if (bind(l2socket, (struct sockaddr*)&l2a, sizeof(l2a)) < 0) {
+      close(l2socket);
+      return -2;
+    }
 
     memset(&l2a, 0, sizeof(l2a));
     l2a.l2_family = AF_BLUETOOTH;
@@ -350,7 +385,10 @@ void BluetoothHciSocket::kernelDisconnectWorkArounds(int length, char* data) {
     l2a.l2_cid = l2cid;
     l2a.l2_bdaddr_type = data[8] + 1; // BDADDR_LE_PUBLIC (0x01), BDADDR_LE_RANDOM (0x02)
 
-    connect(l2socket, (struct sockaddr *)&l2a, sizeof(l2a));
+    if (connect(l2socket, (struct sockaddr *)&l2a, sizeof(l2a)) < -1) {
+      close(l2socket);
+      return -3;
+    }
 
     this->_l2sockets[handle] = l2socket;
   } else if (length == 7 && data[0] == 0x04 && data[1] == 0x05 && data[2] == 0x04 && data[3] == 0x00) {
@@ -361,6 +399,7 @@ void BluetoothHciSocket::kernelDisconnectWorkArounds(int length, char* data) {
       this->_l2sockets.erase(handle);
     }
   }
+  return 0;
 }
 
 NAN_METHOD(BluetoothHciSocket::New) {
@@ -388,12 +427,12 @@ NAN_METHOD(BluetoothHciSocket::BindRaw) {
   BluetoothHciSocket* p = node::ObjectWrap::Unwrap<BluetoothHciSocket>(info.This());
 
   int devId = 0;
-  int* pDevId = NULL;
+  int* pDevId = nullptr;
 
   if (info.Length() > 0) {
     Local<Value> arg0 = info[0];
     if (arg0->IsInt32() || arg0->IsUint32()) {
-      devId = arg0->IntegerValue();
+      devId = Nan::To<int32_t>(arg0).FromJust();
 
       pDevId = &devId;
     }
@@ -410,12 +449,12 @@ NAN_METHOD(BluetoothHciSocket::BindUser) {
   BluetoothHciSocket* p = node::ObjectWrap::Unwrap<BluetoothHciSocket>(info.This());
 
   int devId = 0;
-  int* pDevId = NULL;
+  int* pDevId = nullptr;
 
   if (info.Length() > 0) {
     Local<Value> arg0 = info[0];
     if (arg0->IsInt32() || arg0->IsUint32()) {
-      devId = arg0->IntegerValue();
+      devId = Nan::To<int32_t>(arg0).FromJust();
 
       pDevId = &devId;
     }
@@ -466,14 +505,15 @@ NAN_METHOD(BluetoothHciSocket::GetDeviceList) {
     for (int i = 0; i < dl->dev_num; i++, dr++) {
       uint16_t devId = dr->dev_id;
       bool devUp = dr->dev_opt & (1 << HCI_UP);
-      if (dr != NULL) {
+      // TODO: smells like there's a bug here (but dr isn't read so...)
+      if (dr != nullptr) {
         v8::Local<v8::Object> obj = Nan::New<v8::Object>();
-        obj->Set(Nan::New("devId").ToLocalChecked(), Nan::New<Number>(devId));
-        obj->Set(Nan::New("devUp").ToLocalChecked(), Nan::New<Boolean>(devUp));
-        obj->Set(Nan::New("idVendor").ToLocalChecked(), Nan::Null());
-        obj->Set(Nan::New("idProduct").ToLocalChecked(), Nan::Null());
-        obj->Set(Nan::New("busNumber").ToLocalChecked(), Nan::Null());
-        obj->Set(Nan::New("deviceAddress").ToLocalChecked(), Nan::Null());
+        Nan::Set(obj, Nan::New("devId").ToLocalChecked(), Nan::New<Number>(devId));
+        Nan::Set(obj, Nan::New("devUp").ToLocalChecked(), Nan::New<Boolean>(devUp));
+        Nan::Set(obj, Nan::New("idVendor").ToLocalChecked(), Nan::Null());
+        Nan::Set(obj, Nan::New("idProduct").ToLocalChecked(), Nan::Null());
+        Nan::Set(obj, Nan::New("busNumber").ToLocalChecked(), Nan::Null());
+        Nan::Set(obj, Nan::New("deviceAddress").ToLocalChecked(), Nan::Null());
         Nan::Set(deviceList, di++, obj);
       }
     }

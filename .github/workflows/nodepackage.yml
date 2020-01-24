@@ -1,0 +1,37 @@
+name: Node.js package
+
+on:
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node_version: [
+          6,
+          8,
+          10,
+          12,
+        ]
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node_version }}
+      - name: Install dependencies
+        run: |
+          sudo apt -qq update
+          sudo apt install -y libudev-dev
+      - name: Build
+        run: |
+          export PATH=./node_modules/.bin:${PATH}
+          npm install --build-from-source --node-gyp=$(which pangyp)
+          ./node_modules/.bin/node-pre-gyp package
+      - name: Test
+        run: npm test

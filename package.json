@@ -26,26 +26,28 @@
     "win32"
   ],
   "dependencies": {
-    "debug": "^2.2.0",
-    "nan": "^2.0.5",
-    "node-pre-gyp": "0.6.x"
+    "debug": "^4.1.0",
+    "nan": "^2.14.0",
+    "node-pre-gyp": "^0.13.0"
   },
   "optionalDependencies": {
-    "usb": "^1.1.0"
+    "usb": "^1.6.0"
   },
   "devDependencies": {
     "jshint": "^2.8.0"
   },
   "scripts": {
-      "preinstall": "npm install node-pre-gyp",
-      "install": "node-pre-gyp install --fallback-to-build",
-      "test": "jshint lib/*.js"
+    "install": "node-pre-gyp install --fallback-to-build",
+    "test": "jshint lib/*.js && node test.js"
   },
   "binary": {
-      "module_name": "binding",
-      "module_path": "./lib/binding/",
-      "host": "https://github.com/sandeepmistry/node-bluetooth-hci-socket/releases/download/",
-      "package_name": "{module_name}-{version}-{node_abi}-{platform}-{arch}.tar.gz",
-      "remote_path": "{version}"
+    "module_name": "binding",
+    "module_path": "./lib/binding/",
+    "host": "https://github.com/sandeepmistry/node-bluetooth-hci-socket/releases/download/",
+    "package_name": "{module_name}-{version}-{node_abi}-{platform}-{arch}.tar.gz",
+    "remote_path": "{version}"
+  },
+  "jshintConfig": {
+    "esversion": 6
   }
 }

@@ -39,9 +39,9 @@ private:
 
   void poll();
 
-  void emitErrnoError();
-  int devIdFor(int* devId, bool isUp);
-  void kernelDisconnectWorkArounds(int length, char* data);
+  void emitErrnoError(const char *syscall);
+  int devIdFor(const int* devId, bool isUp);
+  int kernelDisconnectWorkArounds(int length, char* data);
 
   static void PollCloseCallback(uv_poll_t* handle);
   static void PollCallback(uv_poll_t* handle, int status, int events);

@@ -23,6 +23,8 @@ This library needs raw USB access to a Bluetooth 4.0 USB adapter, as it needs to
 A [WinUSB](https://msdn.microsoft.com/en-ca/library/windows/hardware/ff540196(v=vs.85).aspx) driver is required, use [Zadig tool](http://zadig.akeo.ie) to replace the driver for your adapter.
 
 __WARNING:__ This will make the adapter unavailable in Windows Bluetooth settings! To roll back to the original driver go to: ```Device Manager -> Open Device -> Update Driver```
+Note: 
+- that one should select "Delete the driver software for this device" as per Zadig instructions if the generation of the system restoral point by Zadig fails if one wishes to use restore system restoral point as an option.
 
 #### Compatible Bluetooth 4.0 USB Adapter's
 
@@ -31,6 +33,7 @@ __WARNING:__ This will make the adapter unavailable in Windows Bluetooth setting
 | BCM920702 Bluetooth 4.0 | 0x0a5c | 0x21e8 |
 | BCM20702A0 Bluetooth 4.0 | 0x19ff | 0x0239 |
 | BCM20702A0 Bluetooth 4.0 | 0x0489 | 0xe07a |
+| BCM20702A0 Bluetooth 4.0 | 0x413c | 0x8143 |
 | CSR8510 A10 | 0x0a12 | 0x0001 |
 | Asus BT-400 | 0x0b05 | 0x17cb |
 | Intel Wireless Bluetooth 6235 | 0x8087 | 0x07da |
