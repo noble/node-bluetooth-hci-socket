@@ -56,6 +56,7 @@ private:
   std::map<unsigned short,int> _l2sockets;
   uint8_t _address[6];
   uint8_t _addressType;
+  //v8::Isolate* isolate;
 
   static Nan::Persistent<v8::FunctionTemplate> constructor_template;
 };
