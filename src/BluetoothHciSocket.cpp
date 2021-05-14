@@ -266,14 +266,15 @@ void BluetoothHciSocket::write_(char* data, int length) {
 void BluetoothHciSocket::emitErrnoError() {
   Nan::HandleScope scope;
 
-  Local<Object> globalObj = Nan::GetCurrentContext()->Global();
+  Local<Context> context = Nan::GetCurrentContext();
+  Local<Object> globalObj = context->Global();
   Local<Function> errorConstructor = Local<Function>::Cast(globalObj->Get(Nan::New("Error").ToLocalChecked()));
 
   Local<Value> constructorArgs[1] = {
     Nan::New(strerror(errno)).ToLocalChecked()
   };
 
-  Local<Value> error = errorConstructor->NewInstance(1, constructorArgs);
+  Local<Value> error = errorConstructor->NewInstance(context, 1, constructorArgs).ToLocalChecked();
 
   Local<Value> argv[2] = {
     Nan::New("error").ToLocalChecked(),
